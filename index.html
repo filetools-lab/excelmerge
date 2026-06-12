@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Excel Report Merger</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="top-bar">
+      <div>
+        <strong data-i18n="brand">Excel Report Merger</strong>
+        <span data-i18n="brandTagline">Local workbook utility</span>
+      </div>
+      <div class="privacy-badge" title="Local processing">
+        <span aria-hidden="true">●</span>
+        <strong data-i18n="privacyBadge">Files stay local</strong>
+      </div>
+      <label class="language-switcher" for="language-select">
+        <span data-i18n="languageLabel">Language</span>
+        <select id="language-select">
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+        </select>
+      </label>
+    </header>
+
+    <section class="hero" aria-labelledby="app-title">
+      <p class="eyebrow" data-i18n="eyebrow">Browser-only Excel utility</p>
+      <h1 id="app-title" data-i18n="heroTitle">Merge Excel reports into one summary workbook</h1>
+      <p class="hero-copy" data-i18n-html="heroCopy">
+        Upload multiple <strong>.xlsx</strong>, <strong>.xls</strong>, or <strong>.csv</strong> files, preview the combined rows,
+        review summary statistics, and export <strong>summary.xlsx</strong>. Processing happens locally in your browser.
+      </p>
+    </section>
+
+    <section class="demo-panel" aria-labelledby="demo-title">
+      <div class="section-header">
+        <div>
+          <h2 id="demo-title" data-i18n="demoTitle">See the workflow before you upload</h2>
+          <p data-i18n="demoCopy">Multiple monthly reports flow into a clean workbook with a cover page, summary statistics, and merged data.</p>
+        </div>
+      </div>
+      <div class="demo-stage" aria-hidden="true">
+        <div class="demo-side demo-before">
+          <div class="demo-card compact-card">
+            <div class="demo-card-header">
+              <span class="demo-label" data-i18n="beforeLabel">Before</span>
+              <strong data-i18n="beforeSummary">3 tables · 5 rows each</strong>
+            </div>
+            <div class="table-stack">
+              <article class="mini-table">
+                <strong data-i18n="demoTableA">North Sales</strong>
+                <div class="row-bars"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+              </article>
+              <article class="mini-table">
+                <strong data-i18n="demoTableB">South Sales</strong>
+                <div class="row-bars"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+              </article>
+              <article class="mini-table">
+                <strong data-i18n="demoTableC">Online Sales</strong>
+                <div class="row-bars"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="demo-arrow" data-i18n="demoArrow">Merge</div>
+        <div class="demo-side demo-after">
+          <div class="demo-card output-book compact-card">
+            <div class="demo-card-header">
+              <span class="demo-label" data-i18n="afterLabel">After</span>
+              <strong data-i18n="afterSummary">1 table · 15 rows</strong>
+            </div>
+            <div class="merged-table">
+              <div class="merged-title"><strong data-i18n="outputWorkbook">summary.xlsx</strong><span data-i18n="dataTab">Merged Data</span></div>
+              <div class="merged-grid">
+                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+              </div>
+              <div class="merged-note">
+                <span data-i18n="afterDetail">Rows are appended into one sheet with Source File and Source Sheet columns.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="privacy-panel" aria-labelledby="privacy-title">
+      <div>
+        <p class="eyebrow" data-i18n="privacyEyebrow">Privacy-first processing</p>
+        <h2 id="privacy-title" data-i18n="privacyTitle">Your Excel files never leave this browser</h2>
+        <p data-i18n="privacyCopy">
+          Files are read, checked, merged, and exported locally on your device. This tool does not upload, store, or analyze your workbook contents on a server.
+        </p>
+      </div>
+      <ul class="privacy-points">
+        <li><strong data-i18n="privacyPointA">No upload server</strong><span data-i18n="privacyPointACopy">Workbook data is processed in the browser.</span></li>
+        <li><strong data-i18n="privacyPointB">No saved files</strong><span data-i18n="privacyPointBCopy">Closing the page clears the selected files.</span></li>
+        <li><strong data-i18n="privacyPointC">Export locally</strong><span data-i18n="privacyPointCCopy">The final workbook is generated on your device.</span></li>
+      </ul>
+    </section>
+
+    <section class="card uploader" aria-labelledby="upload-title">
+      <div>
+        <h2 id="upload-title" data-i18n="uploadTitle">1. Upload reports</h2>
+        <p data-i18n="uploadCopy">Select one or more Excel files. Every worksheet in each workbook is merged.</p>
+      </div>
+      <label class="drop-zone" for="file-input">
+        <span class="drop-icon" aria-hidden="true">📄</span>
+        <span class="drop-title" data-i18n="dropTitle">Choose Excel files</span>
+        <span class="drop-hint" data-i18n="dropHint">or drag and drop them here</span>
+        <input id="file-input" type="file" accept=".xlsx,.xls,.csv" multiple />
+      </label>
+      <div class="pending-summary" aria-live="polite">
+        <span data-i18n="pendingLabel">Pending files</span>
+        <strong id="pending-count">0</strong>
+        <small data-i18n="pendingHint">Add files in batches. Merging starts only after you click Merge files.</small>
+      </div>
+      <fieldset class="merge-options" aria-label="Merge type">
+        <legend data-i18n="mergeType">Merge type</legend>
+        <label class="option-card">
+          <input type="radio" name="merge-mode" value="single" checked />
+          <span>
+            <strong data-i18n="oneSheet">One sheet</strong>
+            <small data-i18n="oneSheetCopy">Combine every row into a single worksheet.</small>
+          </span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="merge-mode" value="workbook" />
+          <span>
+            <strong data-i18n="workbookSheets">Workbook sheets</strong>
+            <small data-i18n="workbookSheetsCopy">Keep each source worksheet as a separate workbook sheet.</small>
+          </span>
+        </label>
+      </fieldset>
+      <div class="actions">
+        <button id="merge-button" type="button" disabled data-i18n="mergeButton">Merge files</button>
+        <button id="reset-button" type="button" class="secondary" disabled data-i18n="resetButton">Reset</button>
+      </div>
+      <ul id="file-list" class="file-list" aria-live="polite"></ul>
+      <p id="status" class="status" role="status" data-i18n="waitingStatus">Waiting for files.</p>
+    </section>
+
+    <section class="stats-grid" aria-label="Workbook summary statistics">
+      <article class="stat-card">
+        <span class="stat-label" data-i18n="statFiles">Files</span>
+        <strong id="stat-files">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label" data-i18n="statRows">Merged rows</span>
+        <strong id="stat-rows">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label" data-i18n="statColumns">Columns</span>
+        <strong id="stat-columns">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label" data-i18n="statNumeric">Numeric columns</span>
+        <strong id="stat-numeric">0</strong>
+      </article>
+    </section>
+
+    <section class="card" aria-labelledby="stats-title">
+      <div class="section-header">
+        <div>
+          <h2 id="stats-title" data-i18n="statsTitle">2. Summary statistics</h2>
+          <p data-i18n="statsCopy">Numeric columns include count, sum, average, minimum, and maximum values.</p>
+        </div>
+        <button id="export-button" type="button" disabled data-i18n="exportButton">Export summary.xlsx</button>
+      </div>
+      <div class="table-wrap">
+        <table id="stats-table">
+          <thead>
+            <tr>
+              <th data-i18n="columnHeader">Column</th>
+              <th data-i18n="typeHeader">Type</th>
+              <th data-i18n="nonEmptyHeader">Non-empty</th>
+              <th data-i18n="blankHeader">Blank</th>
+              <th data-i18n="uniqueHeader">Unique</th>
+              <th data-i18n="sumHeader">Sum</th>
+              <th data-i18n="averageHeader">Average</th>
+              <th data-i18n="minHeader">Min</th>
+              <th data-i18n="maxHeader">Max</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="9" class="empty-state" data-i18n="statsEmpty">Merge files to calculate statistics.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="preview-title">
+      <div class="section-header">
+        <div>
+          <h2 id="preview-title" data-i18n="previewTitle">3. Merged data preview</h2>
+          <p data-i18n="previewCopy">Previewing the first 100 merged rows. The exported workbook contains all rows.</p>
+        </div>
+      </div>
+      <div class="table-wrap preview-wrap">
+        <table id="preview-table">
+          <tbody>
+            <tr><td class="empty-state" data-i18n="previewEmpty">No merged rows yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="validation-modal" class="modal-backdrop" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="validation-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow" data-i18n="validationEyebrow">Review needed</p>
+          <h2 id="validation-title" data-i18n="validationTitle">Some tables do not match</h2>
+        </div>
+      </div>
+      <p data-i18n="validationCopy">The files can still be merged, but these differences may affect the output. Please review them first.</p>
+      <div id="validation-list" class="validation-list"></div>
+      <div class="modal-actions">
+        <button id="review-files-button" type="button" class="secondary" data-i18n="reviewFilesButton">Return to check</button>
+        <button id="continue-merge-button" type="button" data-i18n="continueMergeButton">Continue merge</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
