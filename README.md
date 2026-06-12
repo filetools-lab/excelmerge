@@ -5,6 +5,7 @@ A lightweight static web app for merging multiple Excel reports into a single su
 ## Features
 
 - Switch between English and Chinese from the top language selector
+- Copy the public sharing link and open the GitHub feedback page from the header
 - Preview the workflow with a left/right before-and-after workbook demo, including source files, sheet names, row counts, and exported workbook sheets
 - Upload multiple `.xlsx`, `.xls`, or `.csv` files
 - Add files in multiple batches to a pending merge queue before running the merge
@@ -31,3 +32,11 @@ python3 -m http.server 8000
 Then visit <http://localhost:8000>.
 
 > Note: Excel parsing and export are powered by SheetJS loaded in the browser from the official SheetJS CDN. File contents stay in the browser and are not sent to a backend.
+
+## Public Site
+
+Published URL:
+
+<https://filetools-lab.github.io/excelmerge/>
+
+The site includes SEO metadata, `robots.txt`, and `sitemap.xml` for search indexing.

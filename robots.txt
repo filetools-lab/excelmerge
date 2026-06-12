@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://filetools-lab.github.io/excelmerge/sitemap.xml

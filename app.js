@@ -17,6 +17,7 @@ const validationModal = document.querySelector('#validation-modal');
 const validationList = document.querySelector('#validation-list');
 const reviewFilesButton = document.querySelector('#review-files-button');
 const continueMergeButton = document.querySelector('#continue-merge-button');
+const shareButton = document.querySelector('#share-button');
 
 let selectedFiles = [];
 let sourceSheets = [];
@@ -28,12 +29,16 @@ let pendingValidationSheets = [];
 
 const SOURCE_FILE = 'Source File';
 const SOURCE_SHEET = 'Source Sheet';
+const SITE_URL = 'https://filetools-lab.github.io/excelmerge/';
 const translations = {
   en: {
     pageTitle: 'Local Excel Report Merger',
     brand: 'Excel Report Merger',
     brandTagline: 'Local workbook utility',
     languageLabel: 'Language',
+    shareButton: 'Copy link',
+    shareCopied: 'Copied',
+    feedbackLink: 'Feedback',
     privacyBadge: 'Files stay local',
     eyebrow: 'Browser-only Excel utility',
     heroTitle: 'Merge Excel reports into one summary workbook',
@@ -168,6 +173,9 @@ const translations = {
     brand: 'Excel 报表合并工具',
     brandTagline: '本地工作簿处理工具',
     languageLabel: '语言',
+    shareButton: '复制链接',
+    shareCopied: '已复制',
+    feedbackLink: '反馈',
     privacyBadge: '文件仅保留在本地',
     eyebrow: '仅在浏览器本地处理的 Excel 工具',
     heroTitle: '将多个 Excel 报表合并成一个汇总工作簿',
@@ -332,6 +340,7 @@ resetButton.addEventListener('click', resetApp);
 exportButton.addEventListener('click', exportWorkbook);
 reviewFilesButton.addEventListener('click', closeValidationModal);
 continueMergeButton.addEventListener('click', continueMergeAfterValidation);
+shareButton.addEventListener('click', copyShareLink);
 
 applyLanguage(languageSelect.value);
 
@@ -824,6 +833,20 @@ function applyLanguage(language) {
 
   renderStats(summaryRows);
   renderPreview(mergedRows, allHeaders);
+}
+
+async function copyShareLink() {
+  const originalLabel = t('shareButton');
+
+  try {
+    await navigator.clipboard.writeText(SITE_URL);
+    shareButton.textContent = t('shareCopied');
+    setTimeout(() => {
+      shareButton.textContent = originalLabel;
+    }, 1600);
+  } catch (error) {
+    shareButton.textContent = SITE_URL;
+  }
 }
 
 function t(key, ...args) {
