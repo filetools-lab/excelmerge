@@ -13,6 +13,7 @@ const statColumns = document.querySelector('#stat-columns');
 const statNumeric = document.querySelector('#stat-numeric');
 const statProcessTime = document.querySelector('#stat-process-time');
 const statTimeSaved = document.querySelector('#stat-time-saved');
+const statSheets = document.querySelector('#stat-sheets');
 const languageSelect = document.querySelector('#language-select');
 const pendingCount = document.querySelector('#pending-count');
 const validationModal = document.querySelector('#validation-modal');
@@ -20,6 +21,11 @@ const validationList = document.querySelector('#validation-list');
 const reviewFilesButton = document.querySelector('#review-files-button');
 const continueMergeButton = document.querySelector('#continue-merge-button');
 const shareButton = document.querySelector('#share-button');
+const demoButton = document.querySelector('#demo-button');
+const analyticsVisits = document.querySelector('#analytics-visits');
+const analyticsMerges = document.querySelector('#analytics-merges');
+const analyticsFiles = document.querySelector('#analytics-files');
+const analyticsExports = document.querySelector('#analytics-exports');
 
 let selectedFiles = [];
 let sourceSheets = [];
@@ -34,19 +40,25 @@ let mergeMetrics = { durationMs: 0, timeSavedMinutes: 0 };
 const SOURCE_FILE = 'Source File';
 const SOURCE_SHEET = 'Source Sheet';
 const SITE_URL = 'https://filetools-lab.github.io/excelmerge/';
+const ANALYTICS_KEY = 'filetoolsLabExcelMergeStats';
 const translations = {
   en: {
-    pageTitle: 'Excel Merge Tool - Merge Excel and CSV Files Locally',
-    brand: 'Excel Report Merger',
-    brandTagline: 'Local workbook utility',
+    pageTitle: 'Merge Multiple Excel Files in Seconds - Local Excel Merge Tool',
+    brand: 'FileTools Lab',
+    brandTagline: 'Excel merge tools for private reports',
     languageLabel: 'Language',
     shareButton: 'Copy link',
     shareCopied: 'Copied',
-    feedbackLink: 'Feedback',
     privacyBadge: 'Files stay local',
-    eyebrow: 'Browser-only Excel utility',
-    heroTitle: 'Merge Excel reports into one summary workbook',
-    heroCopy: 'Upload multiple <strong>.xlsx</strong>, <strong>.xls</strong>, or <strong>.csv</strong> files, preview the combined rows, review summary statistics, and export <strong>summary.xlsx</strong>. Processing happens locally in your browser.',
+    eyebrow: 'Browser based Excel merge tool',
+    heroTitle: 'Merge Multiple Excel Files in Seconds',
+    heroPointLocal: '100% Local Processing',
+    heroPointUpload: 'No Upload Required',
+    heroPointFree: 'Free Browser-Based Tool',
+    heroCopy: 'Combine Excel and CSV reports directly in your browser. No registration. No server upload. Your files never leave your device.',
+    heroStartButton: 'Start merging',
+    demoDataButton: 'Try Demo Data',
+    demoLoadedStatus: 'Demo data loaded. Three monthly sales reports are ready to merge.',
     privacyEyebrow: 'Privacy-first processing',
     privacyTitle: 'Your Excel files never leave this browser',
     privacyCopy: 'Files are read, checked, merged, and exported locally on your device. This tool does not upload, store, or analyze your workbook contents on a server.',
@@ -56,6 +68,15 @@ const translations = {
     privacyPointBCopy: 'Closing the page clears the selected files.',
     privacyPointC: 'Export locally',
     privacyPointCCopy: 'The final workbook is generated on your device.',
+    useCasesEyebrow: 'Perfect For',
+    useCasesTitle: 'Combine multiple Excel reports for everyday business work',
+    useCasesCopy: 'Use this browser based Excel merge tool for recurring files that need to become one clean workbook.',
+    useCaseDaily: 'Daily Reports',
+    useCaseWeekly: 'Weekly Reports',
+    useCaseMonthly: 'Monthly Reports',
+    useCaseSales: 'Sales Reports',
+    useCaseStore: 'Store Performance Reports',
+    useCaseFinancial: 'Financial Worksheets',
     stepsEyebrow: 'How it works',
     stepsTitle: 'Merge Excel files in four steps',
     stepsCopy: 'Add files, check differences, choose an output format, and export a clean workbook.',
@@ -106,7 +127,10 @@ const translations = {
     sheetStatsDetail: 'column metrics',
     dataTab: 'Merged Data',
     uploadTitle: '1. Upload reports',
-    uploadCopy: 'Select one or more Excel files. Every worksheet in each workbook is merged.',
+    uploadCopy: 'Select one or more Excel files, or try demo data first. Every worksheet in each workbook is merged locally.',
+    workspaceEyebrow: 'Merge Workspace',
+    workspaceTitle: 'Add files and choose how to merge them',
+    workspaceCopy: 'This is the only area where you select files, choose the merge type, and start processing.',
     dropTitle: 'Choose Excel files',
     dropHint: 'or drag and drop them here. Files are added locally and are not uploaded.',
     pendingLabel: 'Pending files',
@@ -127,12 +151,16 @@ const translations = {
     mergedStatus: (rows, files, duration, saved) => `Merged ${rows.toLocaleString()} row${rows === 1 ? '' : 's'} from ${files} file${files === 1 ? '' : 's'}. Completed in ${duration}. Estimated ${saved} saved.`,
     noRowsStatus: 'No data rows were found in the selected workbooks.',
     mergeError: (message) => `Unable to merge files: ${message}`,
-    statFiles: 'Files',
-    statRows: 'Merged rows',
+    statFiles: 'Files Processed',
+    statRows: 'Rows Merged',
     statColumns: 'Columns',
     statNumeric: 'Numeric columns',
     statProcessTime: 'Process time',
-    statTimeSaved: 'Time saved est.',
+    statTimeSaved: 'Estimated Time Saved',
+    statSheetsCombined: 'Sheets combined',
+    resultsEyebrow: 'Merge Results',
+    resultsTitle: 'Review the output after merging',
+    resultsCopy: 'These cards and tables update only after you run a merge or load demo data.',
     statsTitle: '2. Summary statistics',
     statsCopy: 'Numeric columns include count, sum, average, minimum, and maximum values.',
     exportButton: 'Export summary.xlsx',
@@ -151,15 +179,43 @@ const translations = {
     previewEmpty: 'No merged rows yet.',
     faqEyebrow: 'FAQ',
     faqTitle: 'Common questions',
-    faqCopy: 'Answers for privacy, file formats, merge behavior, and mismatch checks.',
-    faqUploadQuestion: 'Are my Excel files uploaded to a server?',
-    faqUploadAnswer: 'No. Files are read and merged locally in your browser. Workbook contents are not uploaded to an application server.',
-    faqFormatsQuestion: 'Which file formats are supported?',
-    faqFormatsAnswer: 'You can merge .xlsx, .xls, and .csv files.',
-    faqSheetsQuestion: 'Can I merge multiple worksheets?',
-    faqSheetsAnswer: 'Yes. You can combine all rows into one worksheet or keep each source worksheet as a separate sheet in one workbook.',
-    faqMismatchQuestion: 'What happens if headers are different?',
-    faqMismatchAnswer: 'The tool shows a warning with the file and sheet location before merging. You can return to check files or continue merging.',
+    faqCopy: 'Answers about merging Excel files locally, offline use, file privacy, and browser limits.',
+    faqXlsxQuestion: 'Can I merge XLSX files?',
+    faqXlsxAnswer: 'Yes. This free browser based Excel merge tool supports XLSX, XLS and CSV files.',
+    faqUploadQuestion: 'Are files uploaded?',
+    faqUploadAnswer: 'No. All processing happens locally in your browser, so you can merge Excel files without uploading sensitive data.',
+    faqOfflineQuestion: 'Does this work offline?',
+    faqOfflineAnswer: 'Yes. After loading the page you can continue working offline in the same browser tab.',
+    faqSecureQuestion: 'Is my data secure?',
+    faqSecureAnswer: 'Yes. Your files never leave your computer, which makes this useful for financial worksheets, sales reports and private business data.',
+    faqLimitQuestion: 'Is there a file size limit?',
+    faqLimitAnswer: 'There is no server file size limit. The practical limit is your browser memory and device performance.',
+    professionalEyebrow: 'Professional Features',
+    professionalTitle: 'Coming Soon',
+    professionalCopy: 'All current Excel merge features remain free. Future professional tools may help teams analyze reports and create recurring business outputs faster.',
+    proAi: 'AI Report Analysis',
+    proWeekly: 'Weekly Report Generation',
+    proMonthly: 'Monthly Report Generation',
+    proPpt: 'PowerPoint Export',
+    proTemplates: 'Advanced Templates',
+    proBatch: 'Batch Processing',
+    blogEyebrow: 'Excel Guides',
+    blogTitle: 'Learn how to merge Excel reports safely',
+    blogCopy: 'Read practical guides about local Excel merging, sales report workflows, and when to use Power Query.',
+    blogArticleOne: 'How to Merge Multiple Excel Files Without VBA',
+    blogArticleTwo: 'How to Combine Daily Sales Reports into One Excel File',
+    blogArticleThree: 'Excel Merge vs Power Query',
+    blogArticleFour: 'Merge Excel Files Locally Without Uploading Data',
+    analyticsEyebrow: 'Usage Snapshot',
+    analyticsTitle: 'Local activity in this browser',
+    analyticsCopy: 'These privacy-friendly counters are stored only in this browser. Connect Google Analytics, Plausible, or Umami later for real public traffic numbers.',
+    analyticsLocalLabel: 'Local browser stats',
+    analyticsVisits: 'Visits',
+    analyticsMerges: 'Merge Operations',
+    analyticsFiles: 'Files Processed',
+    analyticsExports: 'Exports Generated',
+    footerBrand: 'Powered by FileTools Lab',
+    footerRoadmap: 'Excel Merge · CSV Merge · Excel Compare · CSV Compare · Excel To CSV · CSV To Excel · AI Report Analyzer',
     numericType: 'Numeric',
     textType: 'Text/Mixed',
     coverTitle: 'Local Excel Report Merger',
@@ -199,17 +255,22 @@ const translations = {
     typeBlank: 'blank data',
   },
   zh: {
-    pageTitle: 'Excel 合并工具 - 本地合并 Excel 和 CSV 文件',
-    brand: 'Excel 报表合并工具',
-    brandTagline: '本地工作簿处理工具',
+    pageTitle: '快速合并多个 Excel 文件 - 本地 Excel 合并工具',
+    brand: 'FileTools Lab',
+    brandTagline: '面向隐私报表的 Excel 合并工具',
     languageLabel: '语言',
     shareButton: '复制链接',
     shareCopied: '已复制',
-    feedbackLink: '反馈',
     privacyBadge: '文件仅保留在本地',
-    eyebrow: '仅在浏览器本地处理的 Excel 工具',
-    heroTitle: '将多个 Excel 报表合并成一个汇总工作簿',
-    heroCopy: '上传多个 <strong>.xlsx</strong>、<strong>.xls</strong> 或 <strong>.csv</strong> 文件，预览合并后的数据，查看汇总统计，并导出 <strong>summary.xlsx</strong>。所有处理都在你的浏览器本地完成。',
+    eyebrow: '基于浏览器的 Excel 合并工具',
+    heroTitle: '几秒内合并多个 Excel 文件',
+    heroPointLocal: '100% 本地处理',
+    heroPointUpload: '无需上传文件',
+    heroPointFree: '免费的浏览器工具',
+    heroCopy: '直接在浏览器中合并 Excel 和 CSV 报表。无需注册，无需上传到服务器，文件不会离开你的设备。',
+    heroStartButton: '开始合并',
+    demoDataButton: '试用演示数据',
+    demoLoadedStatus: '演示数据已载入。3 个月度销售报表已准备好合并。',
     privacyEyebrow: '隐私优先',
     privacyTitle: '你的 Excel 文件不会离开当前浏览器',
     privacyCopy: '文件读取、检查、合并和导出都在你的设备本地完成。这个工具不会把工作簿内容上传到服务器，也不会存储或分析你的表格数据。',
@@ -219,6 +280,15 @@ const translations = {
     privacyPointBCopy: '关闭页面后，已选择的文件会被清空。',
     privacyPointC: '本地导出',
     privacyPointCCopy: '最终工作簿在你的设备上生成。',
+    useCasesEyebrow: '适合场景',
+    useCasesTitle: '为日常业务工作合并多个 Excel 报表',
+    useCasesCopy: '适合将周期性报表合并成一个清晰工作簿，例如日报、周报、月报和销售报表。',
+    useCaseDaily: '日报',
+    useCaseWeekly: '周报',
+    useCaseMonthly: '月报',
+    useCaseSales: '销售报表',
+    useCaseStore: '门店经营报表',
+    useCaseFinancial: '财务工作表',
     stepsEyebrow: '使用步骤',
     stepsTitle: '四步完成 Excel 合并',
     stepsCopy: '添加文件、检查差异、选择合并方式，然后导出清晰的汇总工作簿。',
@@ -269,7 +339,10 @@ const translations = {
     sheetStatsDetail: '列统计指标',
     dataTab: '合并数据',
     uploadTitle: '1. 上传报表',
-    uploadCopy: '选择一个或多个 Excel 文件。每个工作簿里的所有 worksheet 都会被读取。',
+    uploadCopy: '选择一个或多个 Excel 文件，也可以先试用演示数据。每个工作簿里的所有 worksheet 都会在本地读取。',
+    workspaceEyebrow: '合并工作台',
+    workspaceTitle: '添加文件并选择合并方式',
+    workspaceCopy: '这里是唯一的操作区域：选择文件、选择合并类型，然后开始处理。',
     dropTitle: '选择 Excel 文件',
     dropHint: '也可以把文件拖拽到这里。文件只会加入本地队列，不会上传。',
     pendingLabel: '待合并文件',
@@ -290,12 +363,16 @@ const translations = {
     mergedStatus: (rows, files, duration, saved) => `已从 ${files} 个文件中合并 ${rows.toLocaleString()} 行数据。处理用时 ${duration}，预计节省 ${saved}。`,
     noRowsStatus: '所选工作簿中没有找到数据行。',
     mergeError: (message) => `无法合并文件：${message}`,
-    statFiles: '文件数',
-    statRows: '合并行数',
+    statFiles: '已处理文件',
+    statRows: '已合并行数',
     statColumns: '列数',
     statNumeric: '数字列',
     statProcessTime: '处理耗时',
     statTimeSaved: '预计节省时间',
+    statSheetsCombined: '合并 Sheet 数',
+    resultsEyebrow: '合并结果',
+    resultsTitle: '合并后在这里查看输出结果',
+    resultsCopy: '这些卡片和表格只会在你运行合并或载入演示数据后更新。',
     statsTitle: '2. 汇总统计',
     statsCopy: '数字列会统计数量、总和、平均值、最小值和最大值。',
     exportButton: '导出 summary.xlsx',
@@ -314,15 +391,43 @@ const translations = {
     previewEmpty: '还没有合并数据。',
     faqEyebrow: '常见问题',
     faqTitle: '常见问题',
-    faqCopy: '关于隐私、文件格式、合并方式和差异检查的说明。',
-    faqUploadQuestion: '我的 Excel 文件会上传到服务器吗？',
-    faqUploadAnswer: '不会。文件会在你的浏览器本地读取和合并，工作簿内容不会上传到应用服务器。',
-    faqFormatsQuestion: '支持哪些文件格式？',
-    faqFormatsAnswer: '支持合并 .xlsx、.xls 和 .csv 文件。',
-    faqSheetsQuestion: '可以合并多个 worksheet 吗？',
-    faqSheetsAnswer: '可以。你可以把所有行合并到一个 worksheet，也可以把每个来源 worksheet 保留为一个 workbook 里的独立 sheet。',
-    faqMismatchQuestion: '如果表头不一致会怎样？',
-    faqMismatchAnswer: '工具会在合并前提示文件和 sheet 的具体位置。你可以返回检查文件，也可以确认继续合并。',
+    faqCopy: '关于本地合并 Excel、离线使用、文件隐私和浏览器限制的说明。',
+    faqXlsxQuestion: '可以合并 XLSX 文件吗？',
+    faqXlsxAnswer: '可以。这个免费的浏览器 Excel 合并工具支持 XLSX、XLS 和 CSV 文件。',
+    faqUploadQuestion: '文件会被上传吗？',
+    faqUploadAnswer: '不会。所有处理都在你的浏览器本地完成，你可以在不上传敏感数据的情况下合并 Excel 文件。',
+    faqOfflineQuestion: '这个工具可以离线使用吗？',
+    faqOfflineAnswer: '可以。页面加载完成后，你可以在同一个浏览器标签页里继续离线处理。',
+    faqSecureQuestion: '我的数据安全吗？',
+    faqSecureAnswer: '是的。文件不会离开你的电脑，因此适合处理财务工作表、销售报表和私密业务数据。',
+    faqLimitQuestion: '有文件大小限制吗？',
+    faqLimitAnswer: '没有服务器文件大小限制，实际限制取决于你的浏览器内存和设备性能。',
+    professionalEyebrow: '专业功能',
+    professionalTitle: '即将推出',
+    professionalCopy: '当前 Excel 合并功能保持免费。未来专业工具会帮助团队分析报表，并更快生成周期性业务输出。',
+    proAi: 'AI 报表分析',
+    proWeekly: '周报生成',
+    proMonthly: '月报生成',
+    proPpt: 'PowerPoint 导出',
+    proTemplates: '高级模板',
+    proBatch: '批量处理',
+    blogEyebrow: 'Excel 指南',
+    blogTitle: '学习如何安全合并 Excel 报表',
+    blogCopy: '阅读关于本地 Excel 合并、销售报表流程，以及何时使用 Power Query 的实用指南。',
+    blogArticleOne: '如何不使用 VBA 合并多个 Excel 文件',
+    blogArticleTwo: '如何将每日销售报表合并成一个 Excel 文件',
+    blogArticleThree: 'Excel Merge 与 Power Query 对比',
+    blogArticleFour: '无需上传数据，本地合并 Excel 文件',
+    analyticsEyebrow: '使用统计',
+    analyticsTitle: '此浏览器中的本地活动',
+    analyticsCopy: '这些隐私友好的计数只保存在当前浏览器中。以后接入 Google Analytics、Plausible 或 Umami 后，再展示真实的公开访问数据。',
+    analyticsLocalLabel: '本浏览器统计',
+    analyticsVisits: '访问次数',
+    analyticsMerges: '合并次数',
+    analyticsFiles: '处理文件数',
+    analyticsExports: '导出次数',
+    footerBrand: 'Powered by FileTools Lab',
+    footerRoadmap: 'Excel Merge · CSV Merge · Excel Compare · CSV Compare · Excel To CSV · CSV To Excel · AI Report Analyzer',
     numericType: '数字',
     textType: '文本/混合',
     coverTitle: '本地 Excel 报表合并工具',
@@ -381,7 +486,6 @@ Object.assign(translations, {
     languageLabel: 'भाषा',
     shareButton: 'लिंक कॉपी करें',
     shareCopied: 'कॉपी हो गया',
-    feedbackLink: 'फीडबैक',
     privacyBadge: 'फाइलें स्थानीय रहती हैं',
     eyebrow: 'ब्राउज़र में चलने वाला Excel टूल',
     heroTitle: 'Excel रिपोर्ट को एक सारांश वर्कबुक में मर्ज करें',
@@ -505,7 +609,6 @@ Object.assign(translations, {
     languageLabel: '言語',
     shareButton: 'リンクをコピー',
     shareCopied: 'コピーしました',
-    feedbackLink: 'フィードバック',
     privacyBadge: 'ファイルはローカルに保持',
     eyebrow: 'ブラウザだけで使える Excel ツール',
     heroTitle: 'Excel レポートを 1 つのサマリー workbook に結合',
@@ -629,7 +732,6 @@ Object.assign(translations, {
     languageLabel: 'Idioma',
     shareButton: 'Copiar link',
     shareCopied: 'Copiado',
-    feedbackLink: 'Feedback',
     privacyBadge: 'Arquivos ficam locais',
     eyebrow: 'Ferramenta Excel no navegador',
     heroTitle: 'Mescle relatórios Excel em um workbook de resumo',
@@ -753,7 +855,6 @@ Object.assign(translations, {
     languageLabel: 'Bahasa',
     shareButton: 'Salin tautan',
     shareCopied: 'Disalin',
-    feedbackLink: 'Masukan',
     privacyBadge: 'File tetap lokal',
     eyebrow: 'Alat Excel di browser',
     heroTitle: 'Gabungkan laporan Excel menjadi satu workbook ringkasan',
@@ -905,8 +1006,10 @@ exportButton.addEventListener('click', exportWorkbook);
 reviewFilesButton.addEventListener('click', closeValidationModal);
 continueMergeButton.addEventListener('click', continueMergeAfterValidation);
 shareButton.addEventListener('click', copyShareLink);
+demoButton.addEventListener('click', loadDemoData);
 
 applyLanguage(languageSelect.value);
+incrementAnalytics('visits', 1);
 
 function addSelectedFiles(files) {
   const existingKeys = new Set(selectedFiles.map(getFileKey));
@@ -1002,6 +1105,11 @@ function completeMerge(parsedSheets, readDurationMs = 0) {
   statusText.textContent = mergedRows.length
     ? t('mergedStatus', mergedRows.length, selectedFiles.length, formatDuration(mergeMetrics.durationMs), formatTimeSaved(mergeMetrics.timeSavedMinutes))
     : t('noRowsStatus');
+
+  if (mergedRows.length > 0) {
+    incrementAnalytics('merges', 1);
+    incrementAnalytics('filesProcessed', selectedFiles.length);
+  }
 }
 
 function findValidationIssues(sheets) {
@@ -1298,6 +1406,7 @@ function exportWorkbook() {
 
   XLSX.utils.book_append_sheet(workbook, statsSheet, 'Summary Stats');
   XLSX.writeFile(workbook, 'summary.xlsx');
+  incrementAnalytics('exportsGenerated', 1);
 }
 
 function resetApp() {
@@ -1329,6 +1438,70 @@ function updateStatCards() {
   statNumeric.textContent = summaryRows.filter((row) => row.Type === 'Numeric').length.toLocaleString();
   statProcessTime.textContent = formatDuration(mergeMetrics.durationMs);
   statTimeSaved.textContent = formatTimeSaved(mergeMetrics.timeSavedMinutes);
+  statSheets.textContent = sourceSheets.length.toLocaleString();
+}
+
+function loadDemoData() {
+  if (!window.XLSX) {
+    statusText.textContent = t('sheetJsError');
+    return;
+  }
+
+  const demoSheets = buildDemoSheets();
+  selectedFiles = demoSheets.map((sheet) => createDemoFile(sheet));
+  pendingValidationSheets = [];
+  pendingValidationDurationMs = 0;
+  mergeMetrics = { durationMs: 0, timeSavedMinutes: 0 };
+
+  renderPendingFiles();
+  statusText.textContent = t('demoLoadedStatus');
+  completeMerge(demoSheets, 0);
+  document.querySelector('#stats-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildDemoSheets() {
+  const months = [
+    { fileName: 'Sales_Report_Jan.xlsx', sheetName: 'Sheet_Jan', month: 'Jan', base: 1200 },
+    { fileName: 'Sales_Report_Feb.xlsx', sheetName: 'Sheet_Feb', month: 'Feb', base: 1320 },
+    { fileName: 'Sales_Report_Mar.xlsx', sheetName: 'Sheet_Mar', month: 'Mar', base: 1480 },
+  ];
+  const stores = ['North Store', 'South Store', 'Online Store', 'Outlet Store', 'Airport Store'];
+
+  return months.map((month) => {
+    const data = stores.map((store, index) => ({
+      Month: month.month,
+      Store: store,
+      Orders: 42 + index * 7 + month.month.length,
+      Revenue: month.base + index * 215,
+      Manager: ['Ava', 'Ben', 'Chloe', 'Daniel', 'Emma'][index],
+    }));
+
+    return {
+      fileName: month.fileName,
+      sheetName: month.sheetName,
+      headers: ['Month', 'Store', 'Orders', 'Revenue', 'Manager'],
+      data,
+    };
+  });
+}
+
+function createDemoFile(sheet) {
+  if (window.XLSX && typeof File !== 'undefined') {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(sheet.data, { header: sheet.headers });
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.sheetName);
+    const content = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    return new File([content], sheet.fileName, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      lastModified: Date.now(),
+    });
+  }
+
+  return {
+    name: sheet.fileName,
+    size: 18432,
+    lastModified: Date.now(),
+  };
 }
 
 function estimateTimeSavedMinutes({ fileCount, sourceSheetCount, rowCount }) {
@@ -1391,6 +1564,38 @@ function formatDurationUnit(value, unit) {
   }
 
   return `${value} ${labels[unit]}`;
+}
+
+function getAnalyticsStats() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}');
+    return {
+      visits: Number(stored.visits) || 0,
+      merges: Number(stored.merges) || 0,
+      filesProcessed: Number(stored.filesProcessed) || 0,
+      exportsGenerated: Number(stored.exportsGenerated) || 0,
+    };
+  } catch (error) {
+    return { visits: 0, merges: 0, filesProcessed: 0, exportsGenerated: 0 };
+  }
+}
+
+function saveAnalyticsStats(stats) {
+  localStorage.setItem(ANALYTICS_KEY, JSON.stringify(stats));
+}
+
+function incrementAnalytics(key, amount) {
+  const stats = getAnalyticsStats();
+  stats[key] = (Number(stats[key]) || 0) + amount;
+  saveAnalyticsStats(stats);
+  renderAnalyticsStats(stats);
+}
+
+function renderAnalyticsStats(stats = getAnalyticsStats()) {
+  analyticsVisits.textContent = stats.visits.toLocaleString();
+  analyticsMerges.textContent = stats.merges.toLocaleString();
+  analyticsFiles.textContent = stats.filesProcessed.toLocaleString();
+  analyticsExports.textContent = stats.exportsGenerated.toLocaleString();
 }
 
 function buildCoverSheet({ mergeMode, fileCount, totalRows, sourceSheetCount, outputSheets, durationText, timeSavedText }) {

@@ -3,32 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Merge Excel and CSV files locally in your browser. Check header mismatches, combine multiple sheets, and export summary.xlsx without uploading files to a server." />
-  <meta name="keywords" content="Excel merge tool, merge Excel files, combine Excel sheets, CSV merge, workbook merger, local Excel tool, privacy-first Excel tool" />
+  <meta name="description" content="Merge multiple Excel files without uploading. Combine XLSX, XLS and CSV reports locally in your browser with this free offline Excel merge tool." />
+  <meta name="keywords" content="merge excel files without uploading, merge excel files locally, offline excel merge tool, combine multiple excel reports, merge sales reports excel, merge daily reports excel, merge monthly reports excel, browser based excel merge" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://filetools-lab.github.io/excelmerge/" />
-  <meta property="og:title" content="Excel Merge Tool - Merge Excel and CSV Files Locally" />
-  <meta property="og:description" content="Merge Excel and CSV files locally in your browser. Check mismatched headers and export summary.xlsx without uploading files to a server." />
+  <meta property="og:title" content="Merge Multiple Excel Files in Seconds - Local Browser Tool" />
+  <meta property="og:description" content="Merge Excel files locally without uploading. Combine daily, weekly, monthly and sales reports directly in your browser." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://filetools-lab.github.io/excelmerge/" />
   <meta name="twitter:card" content="summary" />
-  <title>Excel Merge Tool - Merge Excel and CSV Files Locally</title>
+  <title>Merge Multiple Excel Files in Seconds - Local Excel Merge Tool</title>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "Excel Report Merger",
+      "name": "FileTools Lab Excel Merge",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
       "url": "https://filetools-lab.github.io/excelmerge/",
-      "description": "Merge Excel and CSV files locally in your browser. Check header mismatches, combine multiple sheets, and export summary.xlsx without uploading files to a server.",
+      "description": "Merge multiple Excel files without uploading. Combine XLSX, XLS and CSV reports locally in your browser with this free offline Excel merge tool.",
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
       },
       "featureList": [
-        "Merge Excel files locally",
+        "Merge Excel files locally without uploading",
+        "Combine multiple Excel reports",
+        "Merge daily, weekly, monthly and sales reports",
         "Merge CSV files locally",
         "Check header mismatches",
         "Export summary workbook",
@@ -42,8 +44,8 @@
   <main class="app-shell">
     <header class="top-bar">
       <div>
-        <strong data-i18n="brand">Excel Report Merger</strong>
-        <span data-i18n="brandTagline">Local workbook utility</span>
+        <strong data-i18n="brand">FileTools Lab</strong>
+        <span data-i18n="brandTagline">Excel merge tools for private reports</span>
       </div>
       <div class="privacy-badge" title="Local processing">
         <span aria-hidden="true">●</span>
@@ -51,7 +53,6 @@
       </div>
       <nav class="top-actions" aria-label="Site actions">
         <button id="share-button" type="button" class="small-button" data-i18n="shareButton">Copy link</button>
-        <a class="small-button secondary-link" href="https://github.com/filetools-lab/excelmerge/issues" target="_blank" rel="noreferrer" data-i18n="feedbackLink">Feedback</a>
       </nav>
       <label class="language-switcher" for="language-select">
         <span data-i18n="languageLabel">Language</span>
@@ -68,11 +69,37 @@
 
     <section class="hero" aria-labelledby="app-title">
       <p class="eyebrow" data-i18n="eyebrow">Browser-only Excel utility</p>
-      <h1 id="app-title" data-i18n="heroTitle">Merge Excel reports into one summary workbook</h1>
+      <h1 id="app-title" data-i18n="heroTitle">Merge Multiple Excel Files in Seconds</h1>
+      <ul class="hero-points" aria-label="Key benefits">
+        <li data-i18n="heroPointLocal">100% Local Processing</li>
+        <li data-i18n="heroPointUpload">No Upload Required</li>
+        <li data-i18n="heroPointFree">Free Browser-Based Tool</li>
+      </ul>
       <p class="hero-copy" data-i18n-html="heroCopy">
-        Upload multiple <strong>.xlsx</strong>, <strong>.xls</strong>, or <strong>.csv</strong> files, preview the combined rows,
-        review summary statistics, and export <strong>summary.xlsx</strong>. Processing happens locally in your browser.
+        Combine Excel and CSV reports directly in your browser. No registration. No server upload. Your files never leave your device.
       </p>
+      <div class="hero-actions">
+        <a class="primary-action" href="#upload-title" data-i18n="heroStartButton">Start merging</a>
+        <button id="demo-button" type="button" class="small-button demo-button" data-i18n="demoDataButton">Try Demo Data</button>
+      </div>
+    </section>
+
+    <section class="content-section use-cases" aria-labelledby="use-cases-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow" data-i18n="useCasesEyebrow">Perfect For</p>
+          <h2 id="use-cases-title" data-i18n="useCasesTitle">Combine multiple Excel reports for everyday business work</h2>
+          <p data-i18n="useCasesCopy">Use this browser based Excel merge tool for recurring files that need to become one clean workbook.</p>
+        </div>
+      </div>
+      <ul class="check-grid">
+        <li data-i18n="useCaseDaily">Daily Reports</li>
+        <li data-i18n="useCaseWeekly">Weekly Reports</li>
+        <li data-i18n="useCaseMonthly">Monthly Reports</li>
+        <li data-i18n="useCaseSales">Sales Reports</li>
+        <li data-i18n="useCaseStore">Store Performance Reports</li>
+        <li data-i18n="useCaseFinancial">Financial Worksheets</li>
+      </ul>
     </section>
 
     <section class="privacy-panel" aria-labelledby="privacy-title">
@@ -106,10 +133,16 @@
       </ol>
     </section>
 
-    <section class="card uploader" aria-labelledby="upload-title">
+    <section class="workspace-section" aria-labelledby="workspace-title">
+      <div class="section-band">
+        <p class="eyebrow" data-i18n="workspaceEyebrow">Merge Workspace</p>
+        <h2 id="workspace-title" data-i18n="workspaceTitle">Add files and choose how to merge them</h2>
+        <p data-i18n="workspaceCopy">This is the only area where you select files, choose the merge type, and start processing.</p>
+      </div>
+      <div class="card uploader" aria-labelledby="upload-title">
       <div>
         <h2 id="upload-title" data-i18n="uploadTitle">1. Upload reports</h2>
-        <p data-i18n="uploadCopy">Select one or more Excel files. Every worksheet in each workbook is merged.</p>
+        <p data-i18n="uploadCopy">Select one or more Excel files, or try demo data first. Every worksheet in each workbook is merged locally.</p>
       </div>
       <label class="drop-zone" for="file-input">
         <span class="drop-icon" aria-hidden="true">📄</span>
@@ -165,33 +198,45 @@
       </div>
       <ul id="file-list" class="file-list" aria-live="polite"></ul>
       <p id="status" class="status" role="status" data-i18n="waitingStatus">Waiting for files.</p>
+      </div>
     </section>
 
-    <section class="stats-grid" aria-label="Workbook summary statistics">
-      <article class="stat-card">
-        <span class="stat-label" data-i18n="statFiles">Files</span>
-        <strong id="stat-files">0</strong>
-      </article>
-      <article class="stat-card">
-        <span class="stat-label" data-i18n="statRows">Merged rows</span>
-        <strong id="stat-rows">0</strong>
-      </article>
-      <article class="stat-card">
-        <span class="stat-label" data-i18n="statColumns">Columns</span>
-        <strong id="stat-columns">0</strong>
-      </article>
-      <article class="stat-card">
-        <span class="stat-label" data-i18n="statNumeric">Numeric columns</span>
-        <strong id="stat-numeric">0</strong>
-      </article>
-      <article class="stat-card result-card">
-        <span class="stat-label" data-i18n="statProcessTime">Process time</span>
-        <strong id="stat-process-time">0s</strong>
-      </article>
-      <article class="stat-card result-card">
-        <span class="stat-label" data-i18n="statTimeSaved">Time saved est.</span>
-        <strong id="stat-time-saved">0 min</strong>
-      </article>
+    <section class="results-section" aria-labelledby="results-title">
+      <div class="section-band result-band">
+        <p class="eyebrow" data-i18n="resultsEyebrow">Merge Results</p>
+        <h2 id="results-title" data-i18n="resultsTitle">Review the output after merging</h2>
+        <p data-i18n="resultsCopy">These cards and tables update only after you run a merge or load demo data.</p>
+      </div>
+      <div class="stats-grid" aria-label="Workbook summary statistics">
+        <article class="stat-card">
+          <span class="stat-label" data-i18n="statFiles">Files Processed</span>
+          <strong id="stat-files">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label" data-i18n="statRows">Rows Merged</span>
+          <strong id="stat-rows">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label" data-i18n="statColumns">Columns</span>
+          <strong id="stat-columns">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label" data-i18n="statNumeric">Numeric columns</span>
+          <strong id="stat-numeric">0</strong>
+        </article>
+        <article class="stat-card result-card">
+          <span class="stat-label" data-i18n="statProcessTime">Process time</span>
+          <strong id="stat-process-time">0s</strong>
+        </article>
+        <article class="stat-card result-card">
+          <span class="stat-label" data-i18n="statTimeSaved">Estimated Time Saved</span>
+          <strong id="stat-time-saved">0 min</strong>
+        </article>
+        <article class="stat-card result-card">
+          <span class="stat-label" data-i18n="statSheetsCombined">Sheets combined</span>
+          <strong id="stat-sheets">0</strong>
+        </article>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="stats-title">
@@ -250,23 +295,76 @@
       </div>
       <div class="faq-list">
         <details>
-          <summary data-i18n="faqUploadQuestion">Are my Excel files uploaded to a server?</summary>
-          <p data-i18n="faqUploadAnswer">No. Files are read and merged locally in your browser. Workbook contents are not uploaded to an application server.</p>
+          <summary data-i18n="faqXlsxQuestion">Can I merge XLSX files?</summary>
+          <p data-i18n="faqXlsxAnswer">Yes. This free browser based Excel merge tool supports XLSX, XLS and CSV files.</p>
         </details>
         <details>
-          <summary data-i18n="faqFormatsQuestion">Which file formats are supported?</summary>
-          <p data-i18n="faqFormatsAnswer">You can merge .xlsx, .xls, and .csv files.</p>
+          <summary data-i18n="faqUploadQuestion">Are files uploaded?</summary>
+          <p data-i18n="faqUploadAnswer">No. All processing happens locally in your browser, so you can merge Excel files without uploading sensitive data.</p>
         </details>
         <details>
-          <summary data-i18n="faqSheetsQuestion">Can I merge multiple worksheets?</summary>
-          <p data-i18n="faqSheetsAnswer">Yes. You can combine all rows into one worksheet or keep each source worksheet as a separate sheet in one workbook.</p>
+          <summary data-i18n="faqOfflineQuestion">Does this work offline?</summary>
+          <p data-i18n="faqOfflineAnswer">Yes. After loading the page you can continue working offline in the same browser tab.</p>
         </details>
         <details>
-          <summary data-i18n="faqMismatchQuestion">What happens if headers are different?</summary>
-          <p data-i18n="faqMismatchAnswer">The tool shows a warning with the file and sheet location before merging. You can return to check files or continue merging.</p>
+          <summary data-i18n="faqSecureQuestion">Is my data secure?</summary>
+          <p data-i18n="faqSecureAnswer">Yes. Your files never leave your computer, which makes this useful for financial worksheets, sales reports and private business data.</p>
+        </details>
+        <details>
+          <summary data-i18n="faqLimitQuestion">Is there a file size limit?</summary>
+          <p data-i18n="faqLimitAnswer">There is no server file size limit. The practical limit is your browser memory and device performance.</p>
         </details>
       </div>
     </section>
+
+    <section class="content-section professional-section" aria-labelledby="professional-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow" data-i18n="professionalEyebrow">Professional Features</p>
+          <h2 id="professional-title" data-i18n="professionalTitle">Coming Soon</h2>
+          <p data-i18n="professionalCopy">All current Excel merge features remain free. Future professional tools may help teams analyze reports and create recurring business outputs faster.</p>
+        </div>
+      </div>
+      <ul class="feature-list">
+        <li data-i18n="proAi">AI Report Analysis</li>
+        <li data-i18n="proWeekly">Weekly Report Generation</li>
+        <li data-i18n="proMonthly">Monthly Report Generation</li>
+        <li data-i18n="proPpt">PowerPoint Export</li>
+        <li data-i18n="proTemplates">Advanced Templates</li>
+        <li data-i18n="proBatch">Batch Processing</li>
+      </ul>
+    </section>
+
+    <section class="content-section" aria-labelledby="blog-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow" data-i18n="blogEyebrow">Excel Guides</p>
+          <h2 id="blog-title" data-i18n="blogTitle">Learn how to merge Excel reports safely</h2>
+          <p data-i18n="blogCopy">Read practical guides about local Excel merging, sales report workflows, and when to use Power Query.</p>
+        </div>
+      </div>
+      <div class="blog-list">
+        <a href="blog/merge-multiple-excel-files-without-vba.html" data-i18n="blogArticleOne">How to Merge Multiple Excel Files Without VBA</a>
+        <a href="blog/combine-daily-sales-reports.html" data-i18n="blogArticleTwo">How to Combine Daily Sales Reports into One Excel File</a>
+        <a href="blog/excel-merge-vs-power-query.html" data-i18n="blogArticleThree">Excel Merge vs Power Query</a>
+        <a href="blog/merge-excel-files-locally-without-uploading.html" data-i18n="blogArticleFour">Merge Excel Files Locally Without Uploading Data</a>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <strong data-i18n="footerBrand">Powered by FileTools Lab</strong>
+      <span data-i18n="footerRoadmap">Excel Merge · CSV Merge · Excel Compare · CSV Compare · Excel To CSV · CSV To Excel · AI Report Analyzer</span>
+      <small class="footer-analytics" aria-label="Local usage counters">
+        <span data-i18n="analyticsLocalLabel">Local browser stats</span>:
+        <span data-i18n="analyticsVisits">Visits</span> <strong id="analytics-visits">0</strong>
+        <span aria-hidden="true">·</span>
+        <span data-i18n="analyticsMerges">Merge Operations</span> <strong id="analytics-merges">0</strong>
+        <span aria-hidden="true">·</span>
+        <span data-i18n="analyticsFiles">Files Processed</span> <strong id="analytics-files">0</strong>
+        <span aria-hidden="true">·</span>
+        <span data-i18n="analyticsExports">Exports Generated</span> <strong id="analytics-exports">0</strong>
+      </small>
+    </footer>
   </main>
 
   <div id="validation-modal" class="modal-backdrop" hidden>

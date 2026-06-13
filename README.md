@@ -1,11 +1,16 @@
-# Local Excel Report Merger
+# FileTools Lab Excel Merge
 
-A lightweight static web app for merging multiple Excel reports into a single summary workbook. It uses pure HTML, CSS, JavaScript, and SheetJS in the browser—no backend or upload server required.
+A lightweight static web app for merging multiple Excel, XLSX, XLS, and CSV reports into a single summary workbook. It uses pure HTML, CSS, JavaScript, and SheetJS in the browser—no backend or upload server required.
 
 ## Features
 
-- Switch between English and Chinese from the top language selector
+- Switch between English, Chinese, Hindi, Japanese, Portuguese, and Indonesian from the top language selector
 - Copy the public sharing link and open the GitHub feedback page from the header
+- Use built-in demo data to see a full merge result without preparing files
+- Show value metrics after merging: files processed, sheets combined, rows merged, processing time, and estimated time saved
+- Present SEO-friendly homepage sections for use cases, FAQ, and upcoming professional features
+- Include a `/blog` directory with long-form SEO articles about Excel merge workflows
+- Show privacy-friendly local usage counters for visits, merge operations, files processed, and exports generated
 - Preview output behavior directly under each merge type option
 - Read a built-in how-it-works section and FAQ for search-friendly product education
 - Upload multiple `.xlsx`, `.xls`, or `.csv` files
