@@ -11,6 +11,8 @@ const statFiles = document.querySelector('#stat-files');
 const statRows = document.querySelector('#stat-rows');
 const statColumns = document.querySelector('#stat-columns');
 const statNumeric = document.querySelector('#stat-numeric');
+const statProcessTime = document.querySelector('#stat-process-time');
+const statTimeSaved = document.querySelector('#stat-time-saved');
 const languageSelect = document.querySelector('#language-select');
 const pendingCount = document.querySelector('#pending-count');
 const validationModal = document.querySelector('#validation-modal');
@@ -26,13 +28,15 @@ let summaryRows = [];
 let allHeaders = [];
 let currentLanguage = 'en';
 let pendingValidationSheets = [];
+let pendingValidationDurationMs = 0;
+let mergeMetrics = { durationMs: 0, timeSavedMinutes: 0 };
 
 const SOURCE_FILE = 'Source File';
 const SOURCE_SHEET = 'Source Sheet';
 const SITE_URL = 'https://filetools-lab.github.io/excelmerge/';
 const translations = {
   en: {
-    pageTitle: 'Local Excel Report Merger',
+    pageTitle: 'Excel Merge Tool - Merge Excel and CSV Files Locally',
     brand: 'Excel Report Merger',
     brandTagline: 'Local workbook utility',
     languageLabel: 'Language',
@@ -52,6 +56,17 @@ const translations = {
     privacyPointBCopy: 'Closing the page clears the selected files.',
     privacyPointC: 'Export locally',
     privacyPointCCopy: 'The final workbook is generated on your device.',
+    stepsEyebrow: 'How it works',
+    stepsTitle: 'Merge Excel files in four steps',
+    stepsCopy: 'Add files, check differences, choose an output format, and export a clean workbook.',
+    stepOneTitle: 'Add files',
+    stepOneCopy: 'Add .xlsx, .xls, or .csv files in one or more batches.',
+    stepTwoTitle: 'Review checks',
+    stepTwoCopy: 'See warnings for mismatched headers, empty sheets, or content-type differences.',
+    stepThreeTitle: 'Choose merge type',
+    stepThreeCopy: 'Merge all rows into one sheet or keep source sheets in one workbook.',
+    stepFourTitle: 'Export workbook',
+    stepFourCopy: 'Download summary.xlsx with a cover page, stats, and merged data.',
     demoTitle: 'See the workflow before you upload',
     demoCopy: 'Three separate tables with five rows each become one merged table with fifteen rows.',
     beforeLabel: 'Before',
@@ -109,13 +124,15 @@ const translations = {
     duplicateStatus: (total) => `Those files are already in the pending list. ${total} file${total === 1 ? '' : 's'} pending merge.`,
     readingStatus: 'Reading workbooks locally in your browser...',
     sheetJsError: 'SheetJS could not be loaded. Check your internet connection or vendor xlsx.full.min.js locally.',
-    mergedStatus: (rows, files) => `Merged ${rows.toLocaleString()} row${rows === 1 ? '' : 's'} from ${files} file${files === 1 ? '' : 's'}.`,
+    mergedStatus: (rows, files, duration, saved) => `Merged ${rows.toLocaleString()} row${rows === 1 ? '' : 's'} from ${files} file${files === 1 ? '' : 's'}. Completed in ${duration}. Estimated ${saved} saved.`,
     noRowsStatus: 'No data rows were found in the selected workbooks.',
     mergeError: (message) => `Unable to merge files: ${message}`,
     statFiles: 'Files',
     statRows: 'Merged rows',
     statColumns: 'Columns',
     statNumeric: 'Numeric columns',
+    statProcessTime: 'Process time',
+    statTimeSaved: 'Time saved est.',
     statsTitle: '2. Summary statistics',
     statsCopy: 'Numeric columns include count, sum, average, minimum, and maximum values.',
     exportButton: 'Export summary.xlsx',
@@ -132,6 +149,17 @@ const translations = {
     previewTitle: '3. Merged data preview',
     previewCopy: 'Previewing the first 100 merged rows. The exported workbook contains all rows.',
     previewEmpty: 'No merged rows yet.',
+    faqEyebrow: 'FAQ',
+    faqTitle: 'Common questions',
+    faqCopy: 'Answers for privacy, file formats, merge behavior, and mismatch checks.',
+    faqUploadQuestion: 'Are my Excel files uploaded to a server?',
+    faqUploadAnswer: 'No. Files are read and merged locally in your browser. Workbook contents are not uploaded to an application server.',
+    faqFormatsQuestion: 'Which file formats are supported?',
+    faqFormatsAnswer: 'You can merge .xlsx, .xls, and .csv files.',
+    faqSheetsQuestion: 'Can I merge multiple worksheets?',
+    faqSheetsAnswer: 'Yes. You can combine all rows into one worksheet or keep each source worksheet as a separate sheet in one workbook.',
+    faqMismatchQuestion: 'What happens if headers are different?',
+    faqMismatchAnswer: 'The tool shows a warning with the file and sheet location before merging. You can return to check files or continue merging.',
     numericType: 'Numeric',
     textType: 'Text/Mixed',
     coverTitle: 'Local Excel Report Merger',
@@ -141,6 +169,8 @@ const translations = {
     coverFilesMerged: 'Files merged',
     coverSourceSheets: 'Source worksheets merged',
     coverTotalRows: 'Total merged rows',
+    coverProcessingTime: 'Processing time',
+    coverEstimatedTimeSaved: 'Estimated time saved',
     coverGeneratedAt: 'Generated at',
     coverOutputSheet: 'Output sheet',
     coverSourceFile: 'Source file',
@@ -169,7 +199,7 @@ const translations = {
     typeBlank: 'blank data',
   },
   zh: {
-    pageTitle: '本地 Excel 报表合并工具',
+    pageTitle: 'Excel 合并工具 - 本地合并 Excel 和 CSV 文件',
     brand: 'Excel 报表合并工具',
     brandTagline: '本地工作簿处理工具',
     languageLabel: '语言',
@@ -189,6 +219,17 @@ const translations = {
     privacyPointBCopy: '关闭页面后，已选择的文件会被清空。',
     privacyPointC: '本地导出',
     privacyPointCCopy: '最终工作簿在你的设备上生成。',
+    stepsEyebrow: '使用步骤',
+    stepsTitle: '四步完成 Excel 合并',
+    stepsCopy: '添加文件、检查差异、选择合并方式，然后导出清晰的汇总工作簿。',
+    stepOneTitle: '添加文件',
+    stepOneCopy: '分批添加 .xlsx、.xls 或 .csv 文件。',
+    stepTwoTitle: '检查差异',
+    stepTwoCopy: '合并前查看表头不一致、空 sheet 或内容类型差异。',
+    stepThreeTitle: '选择合并方式',
+    stepThreeCopy: '把所有行合并到一个 sheet，或把来源 sheet 保留在一个 workbook 中。',
+    stepFourTitle: '导出工作簿',
+    stepFourCopy: '下载包含封面页、统计页和合并数据的 summary.xlsx。',
     demoTitle: '上传前先看工作效果',
     demoCopy: '3 张各 5 行的数据表，会被合并成 1 张 15 行的汇总表。',
     beforeLabel: '合并前',
@@ -246,13 +287,15 @@ const translations = {
     duplicateStatus: (total) => `这些文件已经在待合并列表中，当前共有 ${total} 个文件待合并。`,
     readingStatus: '正在浏览器本地读取工作簿...',
     sheetJsError: 'SheetJS 加载失败。请检查网络连接，或将 xlsx.full.min.js 改成本地文件。',
-    mergedStatus: (rows, files) => `已从 ${files} 个文件中合并 ${rows.toLocaleString()} 行数据。`,
+    mergedStatus: (rows, files, duration, saved) => `已从 ${files} 个文件中合并 ${rows.toLocaleString()} 行数据。处理用时 ${duration}，预计节省 ${saved}。`,
     noRowsStatus: '所选工作簿中没有找到数据行。',
     mergeError: (message) => `无法合并文件：${message}`,
     statFiles: '文件数',
     statRows: '合并行数',
     statColumns: '列数',
     statNumeric: '数字列',
+    statProcessTime: '处理耗时',
+    statTimeSaved: '预计节省时间',
     statsTitle: '2. 汇总统计',
     statsCopy: '数字列会统计数量、总和、平均值、最小值和最大值。',
     exportButton: '导出 summary.xlsx',
@@ -269,6 +312,17 @@ const translations = {
     previewTitle: '3. 合并数据预览',
     previewCopy: '这里预览前 100 行。导出的工作簿会包含全部行。',
     previewEmpty: '还没有合并数据。',
+    faqEyebrow: '常见问题',
+    faqTitle: '常见问题',
+    faqCopy: '关于隐私、文件格式、合并方式和差异检查的说明。',
+    faqUploadQuestion: '我的 Excel 文件会上传到服务器吗？',
+    faqUploadAnswer: '不会。文件会在你的浏览器本地读取和合并，工作簿内容不会上传到应用服务器。',
+    faqFormatsQuestion: '支持哪些文件格式？',
+    faqFormatsAnswer: '支持合并 .xlsx、.xls 和 .csv 文件。',
+    faqSheetsQuestion: '可以合并多个 worksheet 吗？',
+    faqSheetsAnswer: '可以。你可以把所有行合并到一个 worksheet，也可以把每个来源 worksheet 保留为一个 workbook 里的独立 sheet。',
+    faqMismatchQuestion: '如果表头不一致会怎样？',
+    faqMismatchAnswer: '工具会在合并前提示文件和 sheet 的具体位置。你可以返回检查文件，也可以确认继续合并。',
     numericType: '数字',
     textType: '文本/混合',
     coverTitle: '本地 Excel 报表合并工具',
@@ -278,6 +332,8 @@ const translations = {
     coverFilesMerged: '合并文件数',
     coverSourceSheets: 'Sheet 数',
     coverTotalRows: '合并总行数',
+    coverProcessingTime: '处理耗时',
+    coverEstimatedTimeSaved: '预计节省时间',
     coverGeneratedAt: '生成时间',
     coverOutputSheet: '导出 sheet',
     coverSourceFile: '来源文件',
@@ -306,6 +362,514 @@ const translations = {
     typeBlank: '空白',
   },
 };
+
+const languageAttributes = {
+  en: 'en',
+  zh: 'zh-CN',
+  hi: 'hi',
+  ja: 'ja',
+  pt: 'pt-BR',
+  id: 'id',
+};
+
+Object.assign(translations, {
+  hi: {
+    ...translations.en,
+    pageTitle: 'Excel मर्ज टूल - Excel और CSV फाइलें स्थानीय रूप से मर्ज करें',
+    brand: 'Excel रिपोर्ट मर्जर',
+    brandTagline: 'स्थानीय वर्कबुक टूल',
+    languageLabel: 'भाषा',
+    shareButton: 'लिंक कॉपी करें',
+    shareCopied: 'कॉपी हो गया',
+    feedbackLink: 'फीडबैक',
+    privacyBadge: 'फाइलें स्थानीय रहती हैं',
+    eyebrow: 'ब्राउज़र में चलने वाला Excel टूल',
+    heroTitle: 'Excel रिपोर्ट को एक सारांश वर्कबुक में मर्ज करें',
+    heroCopy: 'कई <strong>.xlsx</strong>, <strong>.xls</strong>, या <strong>.csv</strong> फाइलें अपलोड करें, संयुक्त पंक्तियां देखें, सारांश आंकड़े जांचें, और <strong>summary.xlsx</strong> निर्यात करें। सारी प्रोसेसिंग आपके ब्राउज़र में स्थानीय रूप से होती है।',
+    privacyEyebrow: 'प्राइवेसी-फर्स्ट प्रोसेसिंग',
+    privacyTitle: 'आपकी Excel फाइलें इस ब्राउज़र से बाहर नहीं जातीं',
+    privacyCopy: 'फाइलें आपके डिवाइस पर ही पढ़ी, जांची, मर्ज और निर्यात की जाती हैं। यह टूल आपकी वर्कबुक सामग्री को सर्वर पर अपलोड, स्टोर या विश्लेषण नहीं करता।',
+    privacyPointA: 'कोई अपलोड सर्वर नहीं',
+    privacyPointACopy: 'वर्कबुक डेटा ब्राउज़र में प्रोसेस होता है।',
+    privacyPointB: 'फाइलें सेव नहीं होतीं',
+    privacyPointBCopy: 'पेज बंद करने पर चुनी गई फाइलें साफ हो जाती हैं।',
+    privacyPointC: 'स्थानीय निर्यात',
+    privacyPointCCopy: 'अंतिम वर्कबुक आपके डिवाइस पर बनती है।',
+    stepsEyebrow: 'कैसे काम करता है',
+    stepsTitle: 'चार चरणों में Excel फाइलें मर्ज करें',
+    stepsCopy: 'फाइलें जोड़ें, अंतर जांचें, आउटपुट प्रकार चुनें, और साफ वर्कबुक निर्यात करें।',
+    stepOneTitle: 'फाइलें जोड़ें',
+    stepOneCopy: '.xlsx, .xls या .csv फाइलें एक या अधिक बैच में जोड़ें।',
+    stepTwoTitle: 'जांच देखें',
+    stepTwoCopy: 'हेडर mismatch, खाली sheet या content-type अंतर की चेतावनी देखें।',
+    stepThreeTitle: 'मर्ज प्रकार चुनें',
+    stepThreeCopy: 'सभी rows एक sheet में मर्ज करें या source sheets को एक workbook में रखें।',
+    stepFourTitle: 'वर्कबुक निर्यात करें',
+    stepFourCopy: 'Cover page, stats और merged data वाली summary.xlsx डाउनलोड करें।',
+    uploadTitle: '1. रिपोर्ट अपलोड करें',
+    uploadCopy: 'एक या अधिक Excel फाइलें चुनें। हर workbook की सभी worksheets पढ़ी जाएंगी।',
+    dropTitle: 'Excel फाइलें चुनें',
+    dropHint: 'या उन्हें यहां ड्रैग और ड्रॉप करें। फाइलें स्थानीय रूप से जोड़ी जाती हैं, अपलोड नहीं होतीं।',
+    pendingLabel: 'लंबित फाइलें',
+    pendingHint: 'फाइलें बैच में जोड़ें। Merge files क्लिक करने के बाद ही मर्ज शुरू होगा।',
+    mergeType: 'मर्ज प्रकार',
+    oneSheet: 'एक sheet',
+    oneSheetCopy: 'हर row को एक worksheet में मिलाएं।',
+    workbookSheets: 'Workbook sheets',
+    workbookSheetsCopy: 'हर source worksheet को अलग workbook sheet के रूप में रखें।',
+    mergeButton: 'फाइलें मर्ज करें',
+    resetButton: 'रीसेट',
+    waitingStatus: 'फाइलों की प्रतीक्षा है।',
+    readyStatus: (count) => `${count} फाइल मर्ज के लिए तैयार।`,
+    addedStatus: (added, total) => `${added} फाइल जोड़ी गई। कुल ${total} फाइलें मर्ज के लिए लंबित।`,
+    duplicateStatus: (total) => `ये फाइलें पहले से सूची में हैं। कुल ${total} फाइलें लंबित।`,
+    readingStatus: 'वर्कबुक आपके ब्राउज़र में स्थानीय रूप से पढ़ी जा रही हैं...',
+    mergedStatus: (rows, files, duration, saved) => `${files} फाइलों से ${rows.toLocaleString()} rows मर्ज हुईं। समय ${duration}। अनुमानित बचत ${saved}।`,
+    noRowsStatus: 'चुनी गई workbooks में data rows नहीं मिलीं।',
+    mergeError: (message) => `फाइलें मर्ज नहीं हो सकीं: ${message}`,
+    statFiles: 'फाइलें',
+    statRows: 'Merged rows',
+    statColumns: 'Columns',
+    statNumeric: 'Numeric columns',
+    statProcessTime: 'Process time',
+    statTimeSaved: 'Time saved est.',
+    statsTitle: '2. सारांश आंकड़े',
+    statsCopy: 'Numeric columns में count, sum, average, minimum और maximum शामिल हैं।',
+    exportButton: 'summary.xlsx निर्यात करें',
+    columnHeader: 'Column',
+    typeHeader: 'Type',
+    nonEmptyHeader: 'Non-empty',
+    blankHeader: 'Blank',
+    uniqueHeader: 'Unique',
+    sumHeader: 'Sum',
+    averageHeader: 'Average',
+    minHeader: 'Min',
+    maxHeader: 'Max',
+    statsEmpty: 'आंकड़े निकालने के लिए फाइलें मर्ज करें।',
+    previewTitle: '3. Merged data preview',
+    previewCopy: 'पहली 100 merged rows दिखाई जा रही हैं। निर्यात की गई workbook में सभी rows होंगी।',
+    previewEmpty: 'अभी merged rows नहीं हैं।',
+    faqEyebrow: 'FAQ',
+    faqTitle: 'सामान्य प्रश्न',
+    faqCopy: 'Privacy, file formats, merge behavior और mismatch checks के जवाब।',
+    faqUploadQuestion: 'क्या मेरी Excel फाइलें server पर upload होती हैं?',
+    faqUploadAnswer: 'नहीं। फाइलें आपके browser में स्थानीय रूप से पढ़ी और मर्ज की जाती हैं।',
+    faqFormatsQuestion: 'कौन से file formats supported हैं?',
+    faqFormatsAnswer: 'आप .xlsx, .xls और .csv files मर्ज कर सकते हैं।',
+    faqSheetsQuestion: 'क्या मैं multiple worksheets मर्ज कर सकता हूं?',
+    faqSheetsAnswer: 'हां। सभी rows को एक worksheet में मिलाएं या source worksheets को एक workbook में अलग sheets की तरह रखें।',
+    faqMismatchQuestion: 'अगर headers अलग हों तो क्या होगा?',
+    faqMismatchAnswer: 'मर्ज से पहले tool file और sheet location के साथ warning दिखाता है। आप जांचने के लिए लौट सकते हैं या जारी रख सकते हैं।',
+    numericType: 'Numeric',
+    textType: 'Text/Mixed',
+    coverTitle: 'स्थानीय Excel रिपोर्ट मर्जर',
+    coverMergeType: 'मर्ज प्रकार',
+    coverOneSheet: 'एक sheet',
+    coverWorkbookSheets: 'Workbook sheets',
+    coverFilesMerged: 'मर्ज की गई फाइलें',
+    coverSourceSheets: 'Source worksheets',
+    coverTotalRows: 'कुल merged rows',
+    coverProcessingTime: 'Processing time',
+    coverEstimatedTimeSaved: 'Estimated time saved',
+    coverGeneratedAt: 'Generated at',
+    coverOutputSheet: 'Output sheet',
+    coverSourceFile: 'Source file',
+    coverSourceSheet: 'Source sheet',
+    coverRows: 'Rows',
+    validationEyebrow: 'Review needed',
+    validationTitle: 'कुछ tables match नहीं करतीं',
+    validationCopy: 'फाइलें फिर भी मर्ज हो सकती हैं, लेकिन ये अंतर output को प्रभावित कर सकते हैं। कृपया पहले review करें।',
+    validationHeaderIssue: 'Header mismatch',
+    validationTypeIssue: 'Content type mismatch',
+    validationEmptyIssue: 'Empty or unreadable sheet',
+    validationMore: (count) => `और ${count} issue नहीं दिखाए गए।`,
+    reviewFilesButton: 'जांचने लौटें',
+    continueMergeButton: 'मर्ज जारी रखें',
+    validationReviewStatus: 'मर्ज रुका हुआ है। Pending files जांचें, फिर दुबारा merge करें।',
+    validationContinueStatus: 'दिखाए गए अंतर के साथ merge जारी है...',
+    missingColumns: (columns) => `Missing columns: ${columns}`,
+    extraColumns: (columns) => `Extra columns: ${columns}`,
+    orderMismatch: 'Column order पहली sheet से अलग है।',
+    typeMismatch: (column, expected, actual) => `"${column}" ${actual} जैसा है, लेकिन पहली sheet ${expected} जैसी है।`,
+    emptySheetDetail: 'इस sheet में कोई data rows नहीं मिलीं।',
+    typeNumeric: 'numeric data',
+    typeDate: 'date data',
+    typeText: 'text data',
+    typeBlank: 'blank data',
+  },
+  ja: {
+    ...translations.en,
+    pageTitle: 'Excel 結合ツール - Excel と CSV をローカルで結合',
+    brand: 'Excel レポート結合ツール',
+    brandTagline: 'ローカル workbook ユーティリティ',
+    languageLabel: '言語',
+    shareButton: 'リンクをコピー',
+    shareCopied: 'コピーしました',
+    feedbackLink: 'フィードバック',
+    privacyBadge: 'ファイルはローカルに保持',
+    eyebrow: 'ブラウザだけで使える Excel ツール',
+    heroTitle: 'Excel レポートを 1 つのサマリー workbook に結合',
+    heroCopy: '複数の <strong>.xlsx</strong>、<strong>.xls</strong>、<strong>.csv</strong> ファイルを追加し、結合結果と統計を確認して <strong>summary.xlsx</strong> を出力できます。処理はブラウザ内でローカルに実行されます。',
+    privacyEyebrow: 'プライバシー重視',
+    privacyTitle: 'Excel ファイルはこのブラウザから外に出ません',
+    privacyCopy: 'ファイルの読み取り、チェック、結合、出力はすべて端末上で行われます。workbook の内容はサーバーにアップロード、保存、分析されません。',
+    privacyPointA: 'アップロードサーバーなし',
+    privacyPointACopy: 'workbook データはブラウザ内で処理されます。',
+    privacyPointB: 'ファイルを保存しません',
+    privacyPointBCopy: 'ページを閉じると選択ファイルはクリアされます。',
+    privacyPointC: 'ローカル出力',
+    privacyPointCCopy: '最終 workbook は端末上で生成されます。',
+    stepsEyebrow: '使い方',
+    stepsTitle: '4 ステップで Excel を結合',
+    stepsCopy: 'ファイル追加、差分確認、出力形式選択、workbook 出力を行います。',
+    stepOneTitle: 'ファイルを追加',
+    stepOneCopy: '.xlsx、.xls、.csv を複数回に分けて追加できます。',
+    stepTwoTitle: 'チェックを確認',
+    stepTwoCopy: 'ヘッダー不一致、空 sheet、内容タイプ差異を確認します。',
+    stepThreeTitle: '結合タイプを選択',
+    stepThreeCopy: 'すべての行を 1 sheet にまとめるか、source sheets を 1 workbook に保持します。',
+    stepFourTitle: 'workbook を出力',
+    stepFourCopy: 'cover page、stats、merged data を含む summary.xlsx をダウンロードします。',
+    uploadTitle: '1. レポートをアップロード',
+    uploadCopy: '1 つ以上の Excel ファイルを選択します。各 workbook のすべての worksheets が読み込まれます。',
+    dropTitle: 'Excel ファイルを選択',
+    dropHint: 'またはここにドラッグ＆ドロップ。ファイルはローカルに追加され、アップロードされません。',
+    pendingLabel: '結合待ちファイル',
+    pendingHint: 'ファイルは分割して追加できます。Merge files をクリックすると結合が始まります。',
+    mergeType: '結合タイプ',
+    oneSheet: '1 つの sheet',
+    oneSheetCopy: 'すべての行を 1 つの worksheet に結合します。',
+    workbookSheets: 'Workbook sheets',
+    workbookSheetsCopy: '各 source worksheet を別々の workbook sheet として保持します。',
+    mergeButton: 'ファイルを結合',
+    resetButton: 'リセット',
+    waitingStatus: 'ファイルを待機中です。',
+    readyStatus: (count) => `${count} 個のファイルを結合できます。`,
+    addedStatus: (added, total) => `${added} 個のファイルを追加しました。合計 ${total} 個が結合待ちです。`,
+    duplicateStatus: (total) => `これらのファイルはすでに追加されています。合計 ${total} 個が結合待ちです。`,
+    readingStatus: 'ブラウザ内で workbook を読み込んでいます...',
+    mergedStatus: (rows, files, duration, saved) => `${files} 個のファイルから ${rows.toLocaleString()} 行を結合しました。処理時間 ${duration}、推定節約時間 ${saved}。`,
+    noRowsStatus: '選択した workbooks にデータ行がありません。',
+    mergeError: (message) => `ファイルを結合できません: ${message}`,
+    statFiles: 'ファイル',
+    statRows: '結合行数',
+    statColumns: '列数',
+    statNumeric: '数値列',
+    statProcessTime: '処理時間',
+    statTimeSaved: '推定節約時間',
+    statsTitle: '2. サマリー統計',
+    statsCopy: '数値列には件数、合計、平均、最小、最大が含まれます。',
+    exportButton: 'summary.xlsx を出力',
+    columnHeader: '列',
+    typeHeader: 'タイプ',
+    nonEmptyHeader: '非空',
+    blankHeader: '空白',
+    uniqueHeader: 'ユニーク',
+    sumHeader: '合計',
+    averageHeader: '平均',
+    minHeader: '最小',
+    maxHeader: '最大',
+    statsEmpty: 'ファイルを結合すると統計が表示されます。',
+    previewTitle: '3. 結合データプレビュー',
+    previewCopy: '最初の 100 行を表示します。出力 workbook にはすべての行が含まれます。',
+    previewEmpty: 'まだ結合データはありません。',
+    faqEyebrow: 'FAQ',
+    faqTitle: 'よくある質問',
+    faqCopy: 'プライバシー、形式、結合方法、差分チェックについて。',
+    faqUploadQuestion: 'Excel ファイルはサーバーにアップロードされますか？',
+    faqUploadAnswer: 'いいえ。ファイルはブラウザ内でローカルに読み込まれ、結合されます。',
+    faqFormatsQuestion: '対応形式は？',
+    faqFormatsAnswer: '.xlsx、.xls、.csv を結合できます。',
+    faqSheetsQuestion: '複数 worksheets を結合できますか？',
+    faqSheetsAnswer: 'はい。すべての行を 1 worksheet にまとめるか、各 source worksheet を 1 workbook 内の別 sheet として保持できます。',
+    faqMismatchQuestion: 'ヘッダーが違う場合は？',
+    faqMismatchAnswer: '結合前に file と sheet の場所を含む警告が表示されます。確認に戻るか、そのまま続行できます。',
+    numericType: '数値',
+    textType: 'テキスト/混在',
+    coverTitle: 'ローカル Excel レポート結合ツール',
+    coverMergeType: '結合タイプ',
+    coverOneSheet: '1 つの sheet',
+    coverWorkbookSheets: 'Workbook sheets',
+    coverFilesMerged: '結合ファイル数',
+    coverSourceSheets: 'Source worksheets',
+    coverTotalRows: '結合行数',
+    coverProcessingTime: '処理時間',
+    coverEstimatedTimeSaved: '推定節約時間',
+    coverGeneratedAt: '生成日時',
+    coverOutputSheet: 'Output sheet',
+    coverSourceFile: 'Source file',
+    coverSourceSheet: 'Source sheet',
+    coverRows: 'Rows',
+    validationEyebrow: '確認が必要',
+    validationTitle: '一致しない table があります',
+    validationCopy: 'ファイルは結合できますが、差異が出力に影響する可能性があります。先に確認してください。',
+    validationHeaderIssue: 'ヘッダー不一致',
+    validationTypeIssue: '内容タイプ不一致',
+    validationEmptyIssue: '空または読み取り不可の sheet',
+    validationMore: (count) => `さらに ${count} 件の issue は未表示です。`,
+    reviewFilesButton: '確認に戻る',
+    continueMergeButton: '結合を続行',
+    validationReviewStatus: '結合を一時停止しました。ファイルを確認して再実行してください。',
+    validationContinueStatus: '表示された差異を含めて結合を続行しています...',
+    missingColumns: (columns) => `不足列: ${columns}`,
+    extraColumns: (columns) => `追加列: ${columns}`,
+    orderMismatch: '列順が最初の sheet と異なります。',
+    typeMismatch: (column, expected, actual) => `"${column}" は ${actual} に見えますが、最初の sheet は ${expected} です。`,
+    emptySheetDetail: 'この sheet にデータ行がありません。',
+    typeNumeric: '数値データ',
+    typeDate: '日付データ',
+    typeText: 'テキストデータ',
+    typeBlank: '空白データ',
+  },
+  pt: {
+    ...translations.en,
+    pageTitle: 'Ferramenta para juntar Excel - Mescle Excel e CSV localmente',
+    brand: 'Mesclador de Relatórios Excel',
+    brandTagline: 'Utilitário local de workbook',
+    languageLabel: 'Idioma',
+    shareButton: 'Copiar link',
+    shareCopied: 'Copiado',
+    feedbackLink: 'Feedback',
+    privacyBadge: 'Arquivos ficam locais',
+    eyebrow: 'Ferramenta Excel no navegador',
+    heroTitle: 'Mescle relatórios Excel em um workbook de resumo',
+    heroCopy: 'Adicione vários arquivos <strong>.xlsx</strong>, <strong>.xls</strong> ou <strong>.csv</strong>, visualize as linhas combinadas, revise estatísticas e exporte <strong>summary.xlsx</strong>. O processamento acontece localmente no navegador.',
+    privacyEyebrow: 'Privacidade em primeiro lugar',
+    privacyTitle: 'Seus arquivos Excel não saem deste navegador',
+    privacyCopy: 'Os arquivos são lidos, verificados, mesclados e exportados localmente no seu dispositivo. O conteúdo do workbook não é enviado, salvo ou analisado em servidor.',
+    privacyPointA: 'Sem servidor de upload',
+    privacyPointACopy: 'Os dados do workbook são processados no navegador.',
+    privacyPointB: 'Sem arquivos salvos',
+    privacyPointBCopy: 'Ao fechar a página, os arquivos selecionados são limpos.',
+    privacyPointC: 'Exportação local',
+    privacyPointCCopy: 'O workbook final é gerado no seu dispositivo.',
+    stepsEyebrow: 'Como funciona',
+    stepsTitle: 'Mescle arquivos Excel em quatro etapas',
+    stepsCopy: 'Adicione arquivos, confira diferenças, escolha o formato e exporte um workbook limpo.',
+    stepOneTitle: 'Adicionar arquivos',
+    stepOneCopy: 'Adicione .xlsx, .xls ou .csv em um ou mais lotes.',
+    stepTwoTitle: 'Revisar alertas',
+    stepTwoCopy: 'Veja avisos de cabeçalhos diferentes, sheets vazias ou diferenças de tipo.',
+    stepThreeTitle: 'Escolher tipo',
+    stepThreeCopy: 'Mescle todas as linhas em uma sheet ou mantenha as source sheets em um workbook.',
+    stepFourTitle: 'Exportar workbook',
+    stepFourCopy: 'Baixe summary.xlsx com cover page, stats e merged data.',
+    uploadTitle: '1. Enviar relatórios',
+    uploadCopy: 'Selecione um ou mais arquivos Excel. Todas as worksheets de cada workbook serão lidas.',
+    dropTitle: 'Escolher arquivos Excel',
+    dropHint: 'ou arraste e solte aqui. Os arquivos são adicionados localmente e não são enviados.',
+    pendingLabel: 'Arquivos pendentes',
+    pendingHint: 'Adicione arquivos em lotes. A mesclagem começa apenas ao clicar em Merge files.',
+    mergeType: 'Tipo de mesclagem',
+    oneSheet: 'Uma sheet',
+    oneSheetCopy: 'Combine todas as linhas em uma única worksheet.',
+    workbookSheets: 'Workbook sheets',
+    workbookSheetsCopy: 'Mantenha cada source worksheet como uma sheet separada.',
+    mergeButton: 'Mesclar arquivos',
+    resetButton: 'Redefinir',
+    waitingStatus: 'Aguardando arquivos.',
+    readyStatus: (count) => `${count} arquivo${count === 1 ? '' : 's'} pronto${count === 1 ? '' : 's'} para mesclar.`,
+    addedStatus: (added, total) => `${added} arquivo${added === 1 ? '' : 's'} adicionado${added === 1 ? '' : 's'}. ${total} arquivo${total === 1 ? '' : 's'} pendente${total === 1 ? '' : 's'}.`,
+    duplicateStatus: (total) => `Esses arquivos já estão na lista. ${total} arquivo${total === 1 ? '' : 's'} pendente${total === 1 ? '' : 's'}.`,
+    readingStatus: 'Lendo workbooks localmente no navegador...',
+    mergedStatus: (rows, files, duration, saved) => `${rows.toLocaleString()} linha${rows === 1 ? '' : 's'} mesclada${rows === 1 ? '' : 's'} de ${files} arquivo${files === 1 ? '' : 's'}. Concluído em ${duration}. Economia estimada: ${saved}.`,
+    noRowsStatus: 'Nenhuma linha de dados foi encontrada nos workbooks selecionados.',
+    mergeError: (message) => `Não foi possível mesclar os arquivos: ${message}`,
+    statFiles: 'Arquivos',
+    statRows: 'Linhas mescladas',
+    statColumns: 'Colunas',
+    statNumeric: 'Colunas numéricas',
+    statProcessTime: 'Tempo de processo',
+    statTimeSaved: 'Tempo economizado',
+    statsTitle: '2. Estatísticas de resumo',
+    statsCopy: 'Colunas numéricas incluem contagem, soma, média, mínimo e máximo.',
+    exportButton: 'Exportar summary.xlsx',
+    columnHeader: 'Coluna',
+    typeHeader: 'Tipo',
+    nonEmptyHeader: 'Não vazio',
+    blankHeader: 'Em branco',
+    uniqueHeader: 'Único',
+    sumHeader: 'Soma',
+    averageHeader: 'Média',
+    minHeader: 'Mín',
+    maxHeader: 'Máx',
+    statsEmpty: 'Mescle arquivos para calcular estatísticas.',
+    previewTitle: '3. Prévia dos dados mesclados',
+    previewCopy: 'Exibindo as primeiras 100 linhas mescladas. O workbook exportado contém todas as linhas.',
+    previewEmpty: 'Ainda não há linhas mescladas.',
+    faqEyebrow: 'FAQ',
+    faqTitle: 'Perguntas frequentes',
+    faqCopy: 'Respostas sobre privacidade, formatos, comportamento de mesclagem e alertas.',
+    faqUploadQuestion: 'Meus arquivos Excel são enviados para um servidor?',
+    faqUploadAnswer: 'Não. Os arquivos são lidos e mesclados localmente no navegador.',
+    faqFormatsQuestion: 'Quais formatos são suportados?',
+    faqFormatsAnswer: 'Você pode mesclar .xlsx, .xls e .csv.',
+    faqSheetsQuestion: 'Posso mesclar várias worksheets?',
+    faqSheetsAnswer: 'Sim. Você pode combinar todas as linhas em uma worksheet ou manter cada source worksheet como uma sheet separada.',
+    faqMismatchQuestion: 'O que acontece se os headers forem diferentes?',
+    faqMismatchAnswer: 'A ferramenta mostra um aviso com o arquivo e a sheet antes de mesclar. Você pode voltar para revisar ou continuar.',
+    numericType: 'Numérico',
+    textType: 'Texto/Misto',
+    coverTitle: 'Mesclador local de relatórios Excel',
+    coverMergeType: 'Tipo de mesclagem',
+    coverOneSheet: 'Uma sheet',
+    coverWorkbookSheets: 'Workbook sheets',
+    coverFilesMerged: 'Arquivos mesclados',
+    coverSourceSheets: 'Source worksheets',
+    coverTotalRows: 'Total de linhas mescladas',
+    coverProcessingTime: 'Tempo de processamento',
+    coverEstimatedTimeSaved: 'Tempo economizado estimado',
+    coverGeneratedAt: 'Gerado em',
+    coverOutputSheet: 'Output sheet',
+    coverSourceFile: 'Source file',
+    coverSourceSheet: 'Source sheet',
+    coverRows: 'Linhas',
+    validationEyebrow: 'Revisão necessária',
+    validationTitle: 'Algumas tabelas não coincidem',
+    validationCopy: 'Os arquivos ainda podem ser mesclados, mas essas diferenças podem afetar o resultado. Revise antes de continuar.',
+    validationHeaderIssue: 'Header diferente',
+    validationTypeIssue: 'Tipo de conteúdo diferente',
+    validationEmptyIssue: 'Sheet vazia ou ilegível',
+    validationMore: (count) => `Mais ${count} problema${count === 1 ? '' : 's'} não exibido${count === 1 ? '' : 's'}.`,
+    reviewFilesButton: 'Voltar para revisar',
+    continueMergeButton: 'Continuar mesclagem',
+    validationReviewStatus: 'Mesclagem pausada. Revise os arquivos pendentes e execute novamente.',
+    validationContinueStatus: 'Continuando a mesclagem com as diferenças listadas...',
+    missingColumns: (columns) => `Colunas ausentes: ${columns}`,
+    extraColumns: (columns) => `Colunas extras: ${columns}`,
+    orderMismatch: 'A ordem das colunas difere da primeira sheet.',
+    typeMismatch: (column, expected, actual) => `"${column}" parece ${actual}, mas a primeira sheet parece ${expected}.`,
+    emptySheetDetail: 'Nenhuma linha de dados foi encontrada nesta sheet.',
+    typeNumeric: 'dados numéricos',
+    typeDate: 'dados de data',
+    typeText: 'dados de texto',
+    typeBlank: 'dados em branco',
+  },
+  id: {
+    ...translations.en,
+    pageTitle: 'Alat Gabung Excel - Gabungkan Excel dan CSV secara lokal',
+    brand: 'Penggabung Laporan Excel',
+    brandTagline: 'Utilitas workbook lokal',
+    languageLabel: 'Bahasa',
+    shareButton: 'Salin tautan',
+    shareCopied: 'Disalin',
+    feedbackLink: 'Masukan',
+    privacyBadge: 'File tetap lokal',
+    eyebrow: 'Alat Excel di browser',
+    heroTitle: 'Gabungkan laporan Excel menjadi satu workbook ringkasan',
+    heroCopy: 'Tambahkan beberapa file <strong>.xlsx</strong>, <strong>.xls</strong>, atau <strong>.csv</strong>, pratinjau baris gabungan, lihat statistik, lalu ekspor <strong>summary.xlsx</strong>. Semua proses berjalan lokal di browser.',
+    privacyEyebrow: 'Privasi diutamakan',
+    privacyTitle: 'File Excel Anda tidak keluar dari browser ini',
+    privacyCopy: 'File dibaca, diperiksa, digabungkan, dan diekspor secara lokal di perangkat Anda. Konten workbook tidak diunggah, disimpan, atau dianalisis di server.',
+    privacyPointA: 'Tanpa server upload',
+    privacyPointACopy: 'Data workbook diproses di browser.',
+    privacyPointB: 'Tidak menyimpan file',
+    privacyPointBCopy: 'Menutup halaman akan menghapus file yang dipilih.',
+    privacyPointC: 'Ekspor lokal',
+    privacyPointCCopy: 'Workbook akhir dibuat di perangkat Anda.',
+    stepsEyebrow: 'Cara kerja',
+    stepsTitle: 'Gabungkan file Excel dalam empat langkah',
+    stepsCopy: 'Tambahkan file, periksa perbedaan, pilih format output, lalu ekspor workbook bersih.',
+    stepOneTitle: 'Tambahkan file',
+    stepOneCopy: 'Tambahkan .xlsx, .xls, atau .csv dalam satu atau beberapa batch.',
+    stepTwoTitle: 'Tinjau pemeriksaan',
+    stepTwoCopy: 'Lihat peringatan untuk header berbeda, sheet kosong, atau perbedaan tipe konten.',
+    stepThreeTitle: 'Pilih tipe gabung',
+    stepThreeCopy: 'Gabungkan semua baris ke satu sheet atau simpan source sheets dalam satu workbook.',
+    stepFourTitle: 'Ekspor workbook',
+    stepFourCopy: 'Unduh summary.xlsx dengan cover page, stats, dan merged data.',
+    uploadTitle: '1. Upload laporan',
+    uploadCopy: 'Pilih satu atau beberapa file Excel. Semua worksheets di setiap workbook akan dibaca.',
+    dropTitle: 'Pilih file Excel',
+    dropHint: 'atau seret dan letakkan di sini. File ditambahkan lokal dan tidak diunggah.',
+    pendingLabel: 'File tertunda',
+    pendingHint: 'Tambahkan file bertahap. Proses gabung mulai hanya setelah tombol Merge files diklik.',
+    mergeType: 'Tipe gabung',
+    oneSheet: 'Satu sheet',
+    oneSheetCopy: 'Gabungkan semua baris ke satu worksheet.',
+    workbookSheets: 'Workbook sheets',
+    workbookSheetsCopy: 'Simpan setiap source worksheet sebagai sheet terpisah.',
+    mergeButton: 'Gabungkan file',
+    resetButton: 'Reset',
+    waitingStatus: 'Menunggu file.',
+    readyStatus: (count) => `${count} file siap digabungkan.`,
+    addedStatus: (added, total) => `${added} file ditambahkan. Total ${total} file menunggu digabungkan.`,
+    duplicateStatus: (total) => `File tersebut sudah ada di daftar. Total ${total} file tertunda.`,
+    readingStatus: 'Membaca workbook secara lokal di browser...',
+    mergedStatus: (rows, files, duration, saved) => `${rows.toLocaleString()} baris dari ${files} file berhasil digabungkan. Selesai dalam ${duration}. Estimasi waktu hemat ${saved}.`,
+    noRowsStatus: 'Tidak ada baris data di workbook yang dipilih.',
+    mergeError: (message) => `Tidak dapat menggabungkan file: ${message}`,
+    statFiles: 'File',
+    statRows: 'Baris gabungan',
+    statColumns: 'Kolom',
+    statNumeric: 'Kolom numerik',
+    statProcessTime: 'Waktu proses',
+    statTimeSaved: 'Estimasi hemat waktu',
+    statsTitle: '2. Statistik ringkasan',
+    statsCopy: 'Kolom numerik mencakup jumlah, total, rata-rata, minimum, dan maksimum.',
+    exportButton: 'Ekspor summary.xlsx',
+    columnHeader: 'Kolom',
+    typeHeader: 'Tipe',
+    nonEmptyHeader: 'Terisi',
+    blankHeader: 'Kosong',
+    uniqueHeader: 'Unik',
+    sumHeader: 'Total',
+    averageHeader: 'Rata-rata',
+    minHeader: 'Min',
+    maxHeader: 'Maks',
+    statsEmpty: 'Gabungkan file untuk menghitung statistik.',
+    previewTitle: '3. Pratinjau data gabungan',
+    previewCopy: 'Menampilkan 100 baris pertama. Workbook ekspor berisi semua baris.',
+    previewEmpty: 'Belum ada baris gabungan.',
+    faqEyebrow: 'FAQ',
+    faqTitle: 'Pertanyaan umum',
+    faqCopy: 'Jawaban tentang privasi, format file, perilaku gabung, dan pemeriksaan mismatch.',
+    faqUploadQuestion: 'Apakah file Excel saya diunggah ke server?',
+    faqUploadAnswer: 'Tidak. File dibaca dan digabungkan secara lokal di browser Anda.',
+    faqFormatsQuestion: 'Format file apa yang didukung?',
+    faqFormatsAnswer: 'Anda dapat menggabungkan .xlsx, .xls, dan .csv.',
+    faqSheetsQuestion: 'Bisakah saya menggabungkan beberapa worksheets?',
+    faqSheetsAnswer: 'Bisa. Gabungkan semua baris ke satu worksheet atau simpan setiap source worksheet sebagai sheet terpisah.',
+    faqMismatchQuestion: 'Apa yang terjadi jika header berbeda?',
+    faqMismatchAnswer: 'Alat akan menampilkan peringatan dengan lokasi file dan sheet sebelum gabung. Anda dapat kembali memeriksa atau melanjutkan.',
+    numericType: 'Numerik',
+    textType: 'Teks/Campuran',
+    coverTitle: 'Penggabung Laporan Excel Lokal',
+    coverMergeType: 'Tipe gabung',
+    coverOneSheet: 'Satu sheet',
+    coverWorkbookSheets: 'Workbook sheets',
+    coverFilesMerged: 'File digabungkan',
+    coverSourceSheets: 'Source worksheets',
+    coverTotalRows: 'Total baris gabungan',
+    coverProcessingTime: 'Waktu proses',
+    coverEstimatedTimeSaved: 'Estimasi waktu hemat',
+    coverGeneratedAt: 'Dibuat pada',
+    coverOutputSheet: 'Output sheet',
+    coverSourceFile: 'Source file',
+    coverSourceSheet: 'Source sheet',
+    coverRows: 'Baris',
+    validationEyebrow: 'Perlu ditinjau',
+    validationTitle: 'Beberapa tabel tidak cocok',
+    validationCopy: 'File masih bisa digabungkan, tetapi perbedaan ini dapat memengaruhi hasil. Harap tinjau terlebih dahulu.',
+    validationHeaderIssue: 'Header tidak cocok',
+    validationTypeIssue: 'Tipe konten tidak cocok',
+    validationEmptyIssue: 'Sheet kosong atau tidak terbaca',
+    validationMore: (count) => `Dan ${count} masalah lain tidak ditampilkan.`,
+    reviewFilesButton: 'Kembali periksa',
+    continueMergeButton: 'Lanjut gabung',
+    validationReviewStatus: 'Gabung dijeda. Periksa file tertunda, lalu jalankan lagi.',
+    validationContinueStatus: 'Melanjutkan gabung dengan perbedaan yang tercantum...',
+    missingColumns: (columns) => `Kolom hilang: ${columns}`,
+    extraColumns: (columns) => `Kolom tambahan: ${columns}`,
+    orderMismatch: 'Urutan kolom berbeda dari sheet pertama.',
+    typeMismatch: (column, expected, actual) => `"${column}" terlihat seperti ${actual}, tetapi sheet pertama terlihat seperti ${expected}.`,
+    emptySheetDetail: 'Tidak ada baris data di sheet ini.',
+    typeNumeric: 'data numerik',
+    typeDate: 'data tanggal',
+    typeText: 'data teks',
+    typeBlank: 'data kosong',
+  },
+});
 
 fileInput.addEventListener('change', (event) => {
   addSelectedFiles([...event.target.files]);
@@ -378,19 +942,24 @@ async function mergeFiles() {
 
   mergeButton.disabled = true;
   exportButton.disabled = true;
+  mergeMetrics = { durationMs: 0, timeSavedMinutes: 0 };
+  updateStatCards();
   statusText.textContent = t('readingStatus');
 
   try {
+    const readStart = performance.now();
     const parsedSheets = (await Promise.all(selectedFiles.map(readWorkbook))).flat();
+    const readDurationMs = performance.now() - readStart;
     const issues = findValidationIssues(parsedSheets);
 
     if (issues.length > 0) {
       pendingValidationSheets = parsedSheets;
+      pendingValidationDurationMs = readDurationMs;
       showValidationModal(issues);
       return;
     }
 
-    completeMerge(parsedSheets);
+    completeMerge(parsedSheets, readDurationMs);
   } catch (error) {
     console.error(error);
     statusText.textContent = t('mergeError', error.message);
@@ -400,7 +969,8 @@ async function mergeFiles() {
   }
 }
 
-function completeMerge(parsedSheets) {
+function completeMerge(parsedSheets, readDurationMs = 0) {
+  const mergeStart = performance.now();
   sourceSheets = parsedSheets;
   const headers = new Set([SOURCE_FILE, SOURCE_SHEET]);
   const rows = [];
@@ -415,6 +985,14 @@ function completeMerge(parsedSheets) {
   allHeaders = [...headers];
   mergedRows = rows.map((row) => normalizeRow(row, allHeaders));
   summaryRows = buildSummaryRows(mergedRows, allHeaders);
+  mergeMetrics = {
+    durationMs: readDurationMs + performance.now() - mergeStart,
+    timeSavedMinutes: estimateTimeSavedMinutes({
+      fileCount: selectedFiles.length,
+      sourceSheetCount: sourceSheets.length,
+      rowCount: mergedRows.length,
+    }),
+  };
 
   renderStats(summaryRows);
   renderPreview(mergedRows, allHeaders);
@@ -422,7 +1000,7 @@ function completeMerge(parsedSheets) {
 
   exportButton.disabled = mergedRows.length === 0;
   statusText.textContent = mergedRows.length
-    ? t('mergedStatus', mergedRows.length, selectedFiles.length)
+    ? t('mergedStatus', mergedRows.length, selectedFiles.length, formatDuration(mergeMetrics.durationMs), formatTimeSaved(mergeMetrics.timeSavedMinutes))
     : t('noRowsStatus');
 }
 
@@ -519,14 +1097,18 @@ function showValidationModal(issues) {
 function closeValidationModal() {
   validationModal.hidden = true;
   pendingValidationSheets = [];
+  pendingValidationDurationMs = 0;
   statusText.textContent = t('validationReviewStatus');
 }
 
 function continueMergeAfterValidation() {
   validationModal.hidden = true;
   statusText.textContent = t('validationContinueStatus');
-  completeMerge(pendingValidationSheets);
+  const sheets = pendingValidationSheets;
+  const readDurationMs = pendingValidationDurationMs;
   pendingValidationSheets = [];
+  pendingValidationDurationMs = 0;
+  completeMerge(sheets, readDurationMs);
   mergeButton.disabled = selectedFiles.length === 0;
   resetButton.disabled = selectedFiles.length === 0 && mergedRows.length === 0;
 }
@@ -696,6 +1278,8 @@ function exportWorkbook() {
     totalRows: mergedRows.length,
     sourceSheetCount: sourceSheets.length,
     outputSheets,
+    durationText: formatDuration(mergeMetrics.durationMs),
+    timeSavedText: formatTimeSaved(mergeMetrics.timeSavedMinutes),
   });
 
   XLSX.utils.book_append_sheet(workbook, coverSheet, 'Cover Page');
@@ -723,6 +1307,8 @@ function resetApp() {
   summaryRows = [];
   allHeaders = [];
   pendingValidationSheets = [];
+  pendingValidationDurationMs = 0;
+  mergeMetrics = { durationMs: 0, timeSavedMinutes: 0 };
   validationModal.hidden = true;
   fileInput.value = '';
   fileList.innerHTML = '';
@@ -741,9 +1327,73 @@ function updateStatCards() {
   statRows.textContent = mergedRows.length.toLocaleString();
   statColumns.textContent = allHeaders.length.toLocaleString();
   statNumeric.textContent = summaryRows.filter((row) => row.Type === 'Numeric').length.toLocaleString();
+  statProcessTime.textContent = formatDuration(mergeMetrics.durationMs);
+  statTimeSaved.textContent = formatTimeSaved(mergeMetrics.timeSavedMinutes);
 }
 
-function buildCoverSheet({ mergeMode, fileCount, totalRows, sourceSheetCount, outputSheets }) {
+function estimateTimeSavedMinutes({ fileCount, sourceSheetCount, rowCount }) {
+  if (rowCount === 0) return 0;
+
+  const fileSetupMinutes = fileCount * 2;
+  const sheetReviewMinutes = sourceSheetCount;
+  const rowHandlingMinutes = Math.ceil(rowCount / 100);
+
+  return Math.max(1, fileSetupMinutes + sheetReviewMinutes + rowHandlingMinutes);
+}
+
+function formatDuration(milliseconds) {
+  if (!milliseconds || milliseconds <= 0) {
+    return formatDurationUnit(0, 'seconds');
+  }
+
+  const seconds = milliseconds / 1000;
+
+  if (seconds < 60) {
+    const value = seconds < 10 ? seconds.toFixed(1) : Math.round(seconds).toString();
+    return formatDurationUnit(value, 'seconds');
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  return `${formatDurationUnit(minutes, 'minutes')} ${formatDurationUnit(remainingSeconds, 'seconds')}`;
+}
+
+function formatTimeSaved(minutes) {
+  if (!minutes || minutes <= 0) {
+    return formatDurationUnit(0, 'minutes');
+  }
+
+  if (minutes < 60) {
+    return formatDurationUnit(minutes, 'minutes');
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return remainingMinutes > 0
+    ? `${formatDurationUnit(hours, 'hours')} ${formatDurationUnit(remainingMinutes, 'minutes')}`
+    : formatDurationUnit(hours, 'hours');
+}
+
+function formatDurationUnit(value, unit) {
+  const unitLabels = {
+    en: { seconds: 's', minutes: 'min', hours: value === 1 ? 'hr' : 'hrs' },
+    zh: { seconds: '秒', minutes: '分钟', hours: '小时' },
+    hi: { seconds: 'सेकंड', minutes: 'मिनट', hours: 'घंटे' },
+    ja: { seconds: '秒', minutes: '分', hours: '時間' },
+    pt: { seconds: 's', minutes: 'min', hours: 'h' },
+    id: { seconds: 'dtk', minutes: 'mnt', hours: 'jam' },
+  };
+  const labels = unitLabels[currentLanguage] || unitLabels.en;
+
+  if (currentLanguage === 'zh' || currentLanguage === 'ja') {
+    return `${value}${labels[unit]}`;
+  }
+
+  return `${value} ${labels[unit]}`;
+}
+
+function buildCoverSheet({ mergeMode, fileCount, totalRows, sourceSheetCount, outputSheets, durationText, timeSavedText }) {
   const rows = [
     [t('coverTitle')],
     [],
@@ -751,6 +1401,8 @@ function buildCoverSheet({ mergeMode, fileCount, totalRows, sourceSheetCount, ou
     [t('coverFilesMerged'), fileCount],
     [t('coverSourceSheets'), sourceSheetCount],
     [t('coverTotalRows'), totalRows],
+    [t('coverProcessingTime'), durationText],
+    [t('coverEstimatedTimeSaved'), timeSavedText],
     [t('coverGeneratedAt'), new Date().toLocaleString()],
     [],
   ];
@@ -772,8 +1424,9 @@ function buildCoverSheet({ mergeMode, fileCount, totalRows, sourceSheetCount, ou
   worksheet['!cols'] = [{ wch: 28 }, { wch: 28 }, { wch: 28 }, { wch: 14 }];
 
   if (mergeMode === 'workbook') {
+    const firstLinkedSheetRow = rows.findIndex((row) => row[0] === t('coverOutputSheet')) + 1;
     outputSheets.forEach((sheet, index) => {
-      const cellAddress = XLSX.utils.encode_cell({ r: 8 + index, c: 0 });
+      const cellAddress = XLSX.utils.encode_cell({ r: firstLinkedSheetRow + index, c: 0 });
       worksheet[cellAddress].l = {
         Target: `#'${sheet.name.replace(/'/g, "''")}'!A1`,
         Tooltip: `Open ${sheet.name}`,
@@ -812,7 +1465,7 @@ function getMergeMode() {
 
 function applyLanguage(language) {
   currentLanguage = translations[language] ? language : 'en';
-  document.documentElement.lang = currentLanguage === 'zh' ? 'zh-CN' : 'en';
+  document.documentElement.lang = languageAttributes[currentLanguage] || 'en';
   document.title = t('pageTitle');
 
   document.querySelectorAll('[data-i18n]').forEach((element) => {
@@ -825,7 +1478,7 @@ function applyLanguage(language) {
 
   if (selectedFiles.length > 0) {
     statusText.textContent = mergedRows.length
-      ? t('mergedStatus', mergedRows.length, selectedFiles.length)
+      ? t('mergedStatus', mergedRows.length, selectedFiles.length, formatDuration(mergeMetrics.durationMs), formatTimeSaved(mergeMetrics.timeSavedMinutes))
       : t('readyStatus', selectedFiles.length);
   } else {
     statusText.textContent = t('waitingStatus');
@@ -833,6 +1486,7 @@ function applyLanguage(language) {
 
   renderStats(summaryRows);
   renderPreview(mergedRows, allHeaders);
+  updateStatCards();
 }
 
 async function copyShareLink() {

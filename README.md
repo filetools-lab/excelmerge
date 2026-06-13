@@ -6,7 +6,8 @@ A lightweight static web app for merging multiple Excel reports into a single su
 
 - Switch between English and Chinese from the top language selector
 - Copy the public sharing link and open the GitHub feedback page from the header
-- Preview the workflow with a left/right before-and-after workbook demo, including source files, sheet names, row counts, and exported workbook sheets
+- Preview output behavior directly under each merge type option
+- Read a built-in how-it-works section and FAQ for search-friendly product education
 - Upload multiple `.xlsx`, `.xls`, or `.csv` files
 - Add files in multiple batches to a pending merge queue before running the merge
 - Review header and content-type mismatches before merging, with the option to return and check files or continue anyway

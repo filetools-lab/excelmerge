@@ -3,16 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Merge Excel and CSV files locally in your browser. Files are not uploaded to a server. Review headers, merge rows, and export summary.xlsx." />
-  <meta name="keywords" content="Excel merge, merge Excel files, CSV merge, workbook merger, local Excel tool, privacy-first Excel tool" />
+  <meta name="description" content="Merge Excel and CSV files locally in your browser. Check header mismatches, combine multiple sheets, and export summary.xlsx without uploading files to a server." />
+  <meta name="keywords" content="Excel merge tool, merge Excel files, combine Excel sheets, CSV merge, workbook merger, local Excel tool, privacy-first Excel tool" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://filetools-lab.github.io/excelmerge/" />
-  <meta property="og:title" content="Excel Report Merger - Private Local Excel Merge Tool" />
-  <meta property="og:description" content="Merge Excel and CSV files locally in your browser. Files stay on your device and are not uploaded to a server." />
+  <meta property="og:title" content="Excel Merge Tool - Merge Excel and CSV Files Locally" />
+  <meta property="og:description" content="Merge Excel and CSV files locally in your browser. Check mismatched headers and export summary.xlsx without uploading files to a server." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://filetools-lab.github.io/excelmerge/" />
   <meta name="twitter:card" content="summary" />
-  <title>Excel Report Merger - Private Local Excel Merge Tool</title>
+  <title>Excel Merge Tool - Merge Excel and CSV Files Locally</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Excel Report Merger",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://filetools-lab.github.io/excelmerge/",
+      "description": "Merge Excel and CSV files locally in your browser. Check header mismatches, combine multiple sheets, and export summary.xlsx without uploading files to a server.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Merge Excel files locally",
+        "Merge CSV files locally",
+        "Check header mismatches",
+        "Export summary workbook",
+        "No server upload"
+      ]
+    }
+  </script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -35,6 +58,10 @@
         <select id="language-select">
           <option value="en">English</option>
           <option value="zh">中文</option>
+          <option value="hi">हिन्दी</option>
+          <option value="ja">日本語</option>
+          <option value="pt">Português</option>
+          <option value="id">Bahasa Indonesia</option>
         </select>
       </label>
     </header>
@@ -46,59 +73,6 @@
         Upload multiple <strong>.xlsx</strong>, <strong>.xls</strong>, or <strong>.csv</strong> files, preview the combined rows,
         review summary statistics, and export <strong>summary.xlsx</strong>. Processing happens locally in your browser.
       </p>
-    </section>
-
-    <section class="demo-panel" aria-labelledby="demo-title">
-      <div class="section-header">
-        <div>
-          <h2 id="demo-title" data-i18n="demoTitle">See the workflow before you upload</h2>
-          <p data-i18n="demoCopy">Multiple monthly reports flow into a clean workbook with a cover page, summary statistics, and merged data.</p>
-        </div>
-      </div>
-      <div class="demo-stage" aria-hidden="true">
-        <div class="demo-side demo-before">
-          <div class="demo-card compact-card">
-            <div class="demo-card-header">
-              <span class="demo-label" data-i18n="beforeLabel">Before</span>
-              <strong data-i18n="beforeSummary">3 tables · 5 rows each</strong>
-            </div>
-            <div class="table-stack">
-              <article class="mini-table">
-                <strong data-i18n="demoTableA">North Sales</strong>
-                <div class="row-bars"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
-              </article>
-              <article class="mini-table">
-                <strong data-i18n="demoTableB">South Sales</strong>
-                <div class="row-bars"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
-              </article>
-              <article class="mini-table">
-                <strong data-i18n="demoTableC">Online Sales</strong>
-                <div class="row-bars"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
-              </article>
-            </div>
-          </div>
-        </div>
-        <div class="demo-arrow" data-i18n="demoArrow">Merge</div>
-        <div class="demo-side demo-after">
-          <div class="demo-card output-book compact-card">
-            <div class="demo-card-header">
-              <span class="demo-label" data-i18n="afterLabel">After</span>
-              <strong data-i18n="afterSummary">1 table · 15 rows</strong>
-            </div>
-            <div class="merged-table">
-              <div class="merged-title"><strong data-i18n="outputWorkbook">summary.xlsx</strong><span data-i18n="dataTab">Merged Data</span></div>
-              <div class="merged-grid">
-                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
-                <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
-              </div>
-              <div class="merged-note">
-                <span data-i18n="afterDetail">Rows are appended into one sheet with Source File and Source Sheet columns.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
 
     <section class="privacy-panel" aria-labelledby="privacy-title">
@@ -114,6 +88,22 @@
         <li><strong data-i18n="privacyPointB">No saved files</strong><span data-i18n="privacyPointBCopy">Closing the page clears the selected files.</span></li>
         <li><strong data-i18n="privacyPointC">Export locally</strong><span data-i18n="privacyPointCCopy">The final workbook is generated on your device.</span></li>
       </ul>
+    </section>
+
+    <section class="content-section" aria-labelledby="steps-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow" data-i18n="stepsEyebrow">How it works</p>
+          <h2 id="steps-title" data-i18n="stepsTitle">Merge Excel files in four steps</h2>
+          <p data-i18n="stepsCopy">Add files, check differences, choose an output format, and export a clean workbook.</p>
+        </div>
+      </div>
+      <ol class="steps-grid">
+        <li><strong data-i18n="stepOneTitle">Add files</strong><span data-i18n="stepOneCopy">Add .xlsx, .xls, or .csv files in one or more batches.</span></li>
+        <li><strong data-i18n="stepTwoTitle">Review checks</strong><span data-i18n="stepTwoCopy">See warnings for mismatched headers, empty sheets, or content-type differences.</span></li>
+        <li><strong data-i18n="stepThreeTitle">Choose merge type</strong><span data-i18n="stepThreeCopy">Merge all rows into one sheet or keep source sheets in one workbook.</span></li>
+        <li><strong data-i18n="stepFourTitle">Export workbook</strong><span data-i18n="stepFourCopy">Download summary.xlsx with a cover page, stats, and merged data.</span></li>
+      </ol>
     </section>
 
     <section class="card uploader" aria-labelledby="upload-title">
@@ -136,16 +126,36 @@
         <legend data-i18n="mergeType">Merge type</legend>
         <label class="option-card">
           <input type="radio" name="merge-mode" value="single" checked />
-          <span>
+          <span class="option-body">
             <strong data-i18n="oneSheet">One sheet</strong>
             <small data-i18n="oneSheetCopy">Combine every row into a single worksheet.</small>
+            <span class="mode-preview one-sheet-preview" aria-hidden="true">
+              <span class="sheet-mini">
+                <strong>Sheet1</strong>
+                <span class="letter-row"><i>a</i><i>b</i><i>c</i><i>d</i></span>
+              </span>
+              <span class="sheet-mini">
+                <strong>Sheet2</strong>
+                <span class="letter-row"><i>e</i><i>f</i><i>g</i><i>h</i></span>
+              </span>
+              <span class="preview-arrow">→</span>
+              <span class="sheet-mini merged-mini">
+                <strong>Sheet1</strong>
+                <span class="letter-row"><i>a</i><i>b</i><i>c</i><i>d</i><i>e</i><i>f</i><i>g</i><i>h</i></span>
+              </span>
+            </span>
           </span>
         </label>
         <label class="option-card">
           <input type="radio" name="merge-mode" value="workbook" />
-          <span>
+          <span class="option-body">
             <strong data-i18n="workbookSheets">Workbook sheets</strong>
             <small data-i18n="workbookSheetsCopy">Keep each source worksheet as a separate workbook sheet.</small>
+            <span class="mode-preview workbook-preview" aria-hidden="true">
+              <span class="sheet-pill">Sheet_Jan</span>
+              <span class="sheet-pill">Sheet_Feb</span>
+              <span class="sheet-pill">Sheet_Mar</span>
+            </span>
           </span>
         </label>
       </fieldset>
@@ -173,6 +183,14 @@
       <article class="stat-card">
         <span class="stat-label" data-i18n="statNumeric">Numeric columns</span>
         <strong id="stat-numeric">0</strong>
+      </article>
+      <article class="stat-card result-card">
+        <span class="stat-label" data-i18n="statProcessTime">Process time</span>
+        <strong id="stat-process-time">0s</strong>
+      </article>
+      <article class="stat-card result-card">
+        <span class="stat-label" data-i18n="statTimeSaved">Time saved est.</span>
+        <strong id="stat-time-saved">0 min</strong>
       </article>
     </section>
 
@@ -219,6 +237,34 @@
             <tr><td class="empty-state" data-i18n="previewEmpty">No merged rows yet.</td></tr>
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <section class="content-section" aria-labelledby="faq-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow" data-i18n="faqEyebrow">FAQ</p>
+          <h2 id="faq-title" data-i18n="faqTitle">Common questions</h2>
+          <p data-i18n="faqCopy">Answers for privacy, file formats, merge behavior, and mismatch checks.</p>
+        </div>
+      </div>
+      <div class="faq-list">
+        <details>
+          <summary data-i18n="faqUploadQuestion">Are my Excel files uploaded to a server?</summary>
+          <p data-i18n="faqUploadAnswer">No. Files are read and merged locally in your browser. Workbook contents are not uploaded to an application server.</p>
+        </details>
+        <details>
+          <summary data-i18n="faqFormatsQuestion">Which file formats are supported?</summary>
+          <p data-i18n="faqFormatsAnswer">You can merge .xlsx, .xls, and .csv files.</p>
+        </details>
+        <details>
+          <summary data-i18n="faqSheetsQuestion">Can I merge multiple worksheets?</summary>
+          <p data-i18n="faqSheetsAnswer">Yes. You can combine all rows into one worksheet or keep each source worksheet as a separate sheet in one workbook.</p>
+        </details>
+        <details>
+          <summary data-i18n="faqMismatchQuestion">What happens if headers are different?</summary>
+          <p data-i18n="faqMismatchAnswer">The tool shows a warning with the file and sheet location before merging. You can return to check files or continue merging.</p>
+        </details>
       </div>
     </section>
   </main>
